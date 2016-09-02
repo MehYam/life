@@ -26,7 +26,6 @@ namespace life
                 foo.GetLength(1)
                 ));
         }
-
         struct Tile
         {
             public readonly int layer;
@@ -47,14 +46,17 @@ namespace life
         }
         static void RunMapTest()
         {
-            // populate a map with layers
+            // create a two-layer 3x4 map
             var map = new Map<int>(2, 3, 4);
-            var random = new Random();
+            Console.WriteLine(map);
 
-            map.ForEach((int layer, int row, int col, int tile) =>
+            // populate it
+            var random = new Random();
+            map.ForEachLayer((Layer<int> layer) => 
             {
-                //map.
+                layer.Fill((int row, int col, int oldTile) => random.Next(0, 100));
             });
+            Console.WriteLine(map);
 
             // actors can occupy the same tile - they have pixel X, Y coordinates.  Tiles have a size, so define a mapping from pixels to tile R,C
         }

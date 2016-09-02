@@ -39,6 +39,18 @@ namespace life
                 }
             }
         }
+        public void Fill(Func<int, int, T, T> callback)
+        {
+            var rows = tiles.GetLength(0);
+            var cols = tiles.GetLength(1);
+            for (var r = 0; r < rows; ++r)
+            {
+                for (var c = 0; c < cols; ++c)
+                {
+                    tiles[r, c] = callback(r, c, tiles[r, c]);
+                }
+            }
+        }
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -85,6 +97,13 @@ namespace life
                 layer.ForEach((int r, int c, T t) => callback(iLayer, r, c, t));
 
                 iLayer++;
+            }
+        }
+        public void ForEachLayer(Action<Layer<T>> callback)
+        {
+            foreach (var layer in layers)
+            {
+                callback(layer);
             }
         }
         public override string ToString()
