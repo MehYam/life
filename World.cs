@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +9,16 @@ namespace life
     sealed class World<T>
     {
         public Map<T> map {get;set;}
+
+        public World()
+        {
+        }
+
+        public void Tick()
+        {
+        }
+        public void SpawnActor()
+        {
+        } 
     }
 }
