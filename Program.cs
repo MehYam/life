@@ -15,7 +15,8 @@ namespace life
             //PointTest();
             //PerlinTest();
             //MapTest();
-            PathfindTest();
+            //PathfindTest();
+            GameWorldTest();
         }
         static void ArrayTest()
         {
@@ -183,6 +184,11 @@ namespace life
             search = new MapAStar<Tile>();
             search.PathFind(layer, (Tile t) => Tile.IsPassable(t.type), new Point<int>(0, 0), new Point<int>(99, 19));
             RenderPath(layer, search);
+        }
+        static void GameWorldTest()
+        {
+            var world = new World(60, 20, 10);
+            world.StartSimulation(5);
         }
     }
 }

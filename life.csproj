@@ -47,6 +47,10 @@
     <Compile Include="astar\AStar.cs" />
     <Compile Include="astar\Cost.cs" />
     <Compile Include="astar\PriorityQueue.cs" />
+    <Compile Include="behavior\IBehavior.cs" />
+    <Compile Include="behavior\ITickHandler.cs" />
+    <Compile Include="behavior\MoveTo.cs" />
+    <Compile Include="behavior\Wander.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapAStar.cs" />
     <Compile Include="PerlinNoise.cs" />
