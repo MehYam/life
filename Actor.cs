@@ -11,6 +11,7 @@ namespace life
     class Actor : ITickHandler
     {
         public readonly char type;
+        public readonly float tilesPerSec;
         public Point<float> pixelPos = new Point<float>(0, 0);
         public Actor(char type = 'A')
         {
@@ -27,6 +28,10 @@ namespace life
                     _priorities.RemoveAt(0);
                 }
             }
+        }
+        public void AddPriority(IBehavior behavior)
+        {
+            _priorities.Add(behavior);
         }
         public override string ToString()
         {

@@ -8,18 +8,35 @@ namespace life
 {
     sealed class World
     {
-        const long TICKS_PER_SECOND = 10000000;
-
+        public const int PIXELS_PER_TILE = 100;
+        public static Point<int> PixelsToTile(Point<float> pixels)
+        {
+            return new Point<int>((int)pixels.x / PIXELS_PER_TILE, (int)pixels.y / PIXELS_PER_TILE);
+        }
+        public static Point<int> PixelsToTileRemainder(Point<float> pixels)
+        {
+            return new Point<int>((int)pixels.x % PIXELS_PER_TILE, (int)pixels.y % PIXELS_PER_TILE);
+        }
+        /// <summary>
+        /// Returns the pixel position at the center of 'tile'
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <returns></returns>
+        public static Point<float> TileToPixels(Point<int> tile)
+        {
+            return new Point<float>(
+                tile.x * PIXELS_PER_TILE + PIXELS_PER_TILE / 2,
+                tile.y * PIXELS_PER_TILE + PIXELS_PER_TILE / 2
+            );
+        }
         public Layer<Tile> map { get; set; }  //KAI: encaps.
         public Layer<Tile> items { get; set; }
-
-        readonly int pixelsPerTile;
-        public World(int width, int height, int pixelsPerTile)
+        public World(int width, int height)
         {
             map = new Layer<Tile>(width, height);
             items = new Layer<Tile>(width, height);
-            this.pixelsPerTile = pixelsPerTile;
         }
+        const long DATETIME_TICKS_PER_SEC = 10000000;
         long _lastTick;
         public void Tick()
         {
@@ -29,8 +46,8 @@ namespace life
             {
                 var delta = now - _lastTick;
 
-                float fDelta = ((float)delta) * TICKS_PER_SECOND;
-                float fNow = ((float)now) * TICKS_PER_SECOND;
+                float fDelta = ((float)delta) * DATETIME_TICKS_PER_SEC;
+                float fNow = ((float)now) * DATETIME_TICKS_PER_SEC;
 
                 // loop through actors, giving them their time slice
                 foreach (var actor in _actors)
@@ -50,7 +67,6 @@ namespace life
         }
 
         bool running;
-
         /// <summary>
         /// Starts the world's game loop
         /// </summary>
@@ -78,10 +94,6 @@ namespace life
 
         public readonly char type;
         public Tile(char type)
-        {
-            this.type = type;
-        }
-        public Tile(int layer, int x, int y, char type)
         {
             this.type = type;
         }

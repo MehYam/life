@@ -15,8 +15,8 @@ namespace life
             //PointTest();
             //PerlinTest();
             //MapTest();
-            //PathfindTest();
-            GameWorldTest();
+            PathfindTest();
+            //GameWorldTest();
         }
         static void ArrayTest()
         {
@@ -31,10 +31,22 @@ namespace life
         static void PointTest()
         {
             var a = new Point<int>(0, 0);
-            var b = new Point<int>(1, 1);
+            var b = new Point<int>(2, 2);
 
-            Console.WriteLine("IEquatable (should be true): " + (new Point<int>(1, 1) == b));
+            var c = new Point<float>(2.5f, 3.5f);
+            var d = new Point<float>(1, 2);
+
+            Console.WriteLine("IEquatable (should be true): " + (new Point<int>(2, 2) == b));
             Console.WriteLine("IEquatable (should be false): " + (a == b));
+            Console.WriteLine("Copy (should be true): " + (new Point<int>(b) == b));
+            Console.WriteLine(string.Format("Addition ({0}) ({1})", Util.Add(a, b), Util.Add(c, d)));
+            Console.WriteLine(string.Format("Addition ({0}) ({1})", Util.Add(a, 3), Util.Add(c, 3.5f)));
+            Console.WriteLine(string.Format("Subtraction ({0}) ({1})", Util.Subtract(a, b), Util.Subtract(c, d)));
+            Console.WriteLine(string.Format("Subtraction ({0}) ({1})", Util.Subtract(a, 3), Util.Subtract(c, 3.5f)));
+            Console.WriteLine(string.Format("Multiplication ({0}) ({1})", Util.Multiply(a, b), Util.Multiply(c, d)));
+            Console.WriteLine(string.Format("Multiplication ({0}) ({1})", Util.Multiply(b, 3), Util.Multiply(c, 3)));
+            Console.WriteLine(string.Format("Division ({0}) ({1})", Util.Divide(b, b), Util.Divide(c, d)));
+            Console.WriteLine(string.Format("Division ({0}) ({1})", Util.Divide(b, 2), Util.Divide(c, 10)));
         }
         static void PerlinTest()
         {
@@ -79,21 +91,20 @@ namespace life
                 return string.Format("L:{0}, {1} T:{2:00} |", layer, pos, type);
             }
         }
-        static void PopulateMap(Map<Tile> map)
+        static void PopulateLayer(Layer<Tile> layer)
         {
             var noise = new Perlin();
-            int iLayer = 0;
-            map.ForEachLayer((Layer<Tile> layer) =>
+            layer.Fill((int x, int y, Tile oldTile) =>
             {
-                layer.Fill((int x, int y, Tile oldTile) =>
-                {
-                    double perlin = noise.perlin(x + 0.5, y + 0.5, iLayer * 0.1);
+                double perlin = noise.perlin(x + 0.5, y + 0.5, 0);
 
-                    char tile = Tile.types[(int)(perlin * Tile.types.Length)];
-                    return new Tile(iLayer, x, y, tile);
-                });
-                ++iLayer;
+                char tile = Tile.types[(int)(perlin * Tile.types.Length)];
+                return new Tile(0, x, y, tile);
             });
+        }
+        static void PopulateMap(Map<Tile> map)
+        {
+            map.ForEachLayer((Layer<Tile> layer) => PopulateLayer(layer));
         }
         static void MapTest()
         { 
@@ -117,25 +128,18 @@ namespace life
         }
         static void RenderPath(Layer<Tile> layer, MapAStar<Tile> search)
         {
-            if (search.solution != null)
+            if (search.result.Count > 0)
             {
-                layer.Set(search.solution.Value.position, new Tile('S'));
-
-                var cost = search.solution.Value.cost;
-                int step = 0;
-                do
+                for (int step = 0; step < search.result.Count; ++step)
                 {
-                    var pos = search.ToPosition(cost.parentIndex);
-                    cost = search._closedList[pos];
-                    layer.Set(pos, new Tile((step++ % 10).ToString()[0]));
+                    layer.Set(search.result[step], new Tile((step % 10).ToString()[0]));
                 }
-                while (cost.parentIndex >= 0);
-
+                layer.Set(search.result[0], new Tile('S'));
                 Console.WriteLine(layer);
             }
             else
             {
-                Console.WriteLine("No solution?");
+                Console.WriteLine("No path?");
             }
         }
         static void RenderSearchExtent(Layer<Tile> layer, MapAStar<Tile> search)
@@ -171,12 +175,12 @@ namespace life
             {
                 for (int r = 1; r < layer.height; ++r)
                 {
-                    layer.Set(c, r, new Tile('O'));
+                    layer.Set(c, r, new Tile('x'));
                 }
                 c += 2;
                 for (int r = 0; r < layer.height - 1; ++r)
                 {
-                    layer.Set(c, r, new Tile('O'));
+                    layer.Set(c, r, new Tile('x'));
                 }
             }
             Console.WriteLine(layer);
@@ -187,8 +191,23 @@ namespace life
         }
         static void GameWorldTest()
         {
-            var world = new World(60, 20, 10);
-            world.StartSimulation(5);
+            var world = new World(100, 20);
+            var noise = new Perlin();
+            world.map.Fill((int x, int y, life.Tile oldTile) =>
+            {
+                double perlin = noise.perlin(x + 0.5, y + 0.5, 0);
+
+                char tile = life.Tile.types[(int)(perlin * life.Tile.types.Length)];
+                return new life.Tile(tile);
+            });
+
+            var actorA = new Actor();
+            var actorB = new Actor();
+            world.AddActor(actorA);
+            world.AddActor(actorB);
+
+            actorA.AddPriority(new behavior.MoveTo(world.map, actorA, actorB));
+            world.StartSimulation(1);
         }
     }
 }

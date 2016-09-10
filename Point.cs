@@ -16,6 +16,11 @@ namespace life
             this.x = x;
             this.y = y;
         }
+        public Point(Point<T> rhs)
+        {
+            this.x = rhs.x;
+            this.y = rhs.y;
+        }
         public bool Equals(Point<T> other)
         {
             return x.Equals(other.x) && y.Equals(other.y);
@@ -32,7 +37,6 @@ namespace life
         {
             return string.Format("{0:0.0},{1:0.0}", x, y);
         }
-
         public static bool operator==(Point<T> a, Point<T> b)
         {
             return a.Equals(b);
@@ -41,5 +45,5 @@ namespace life
         {
             return !a.Equals(b);
         }
-    }
+    }              
 }
