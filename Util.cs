@@ -9,6 +9,7 @@ namespace life
     static class Util
     {
         // Because C# can't support math on generics...
+        //KAI: could use extensions and C# version of specialization?
         public static Point<int> Add(Point<int> a, Point<int> b)
         {
             return new Point<int>(a.x + b.x, a.y + b.y);
@@ -72,6 +73,18 @@ namespace life
         public static Point<float> Divide(Point<float> a, float b)
         {
             return new Point<float>(a.x / b, a.y / b);
+        }
+        public static float Magnitude(Point<float> a)
+        {
+            return (float)Math.Sqrt(Math.Pow(a.x, 2) + Math.Pow(a.y, 2));
+        }
+        public static bool NearlyEqual(float a, float b, float tolerance = 0.0001f)
+        {
+            return Math.Abs(a - b) <= tolerance;
+        }
+        public static bool NearlyEqual(Point<float> a, Point<float> b)
+        {
+            return NearlyEqual(a.x, b.x) && NearlyEqual(a.y, b.y);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace life
     class Actor : ITickHandler
     {
         public readonly char type;
-        public readonly float tilesPerSec;
+        public readonly float speedTPS = 1;
         public Point<float> pixelPos = new Point<float>(0, 0);
         public Actor(char type = 'A')
         {

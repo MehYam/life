@@ -15,8 +15,8 @@ namespace life
             //PointTest();
             //PerlinTest();
             //MapTest();
-            PathfindTest();
-            //GameWorldTest();
+            //PathfindTest();
+            GameWorldTest();
         }
         static void ArrayTest()
         {
@@ -200,14 +200,17 @@ namespace life
                 char tile = life.Tile.types[(int)(perlin * life.Tile.types.Length)];
                 return new life.Tile(tile);
             });
+            Console.WriteLine(world.map);
 
             var actorA = new Actor();
             var actorB = new Actor();
+            actorA.pixelPos = World.TileToPixels(new Point<int>(3, 0));
+            actorB.pixelPos = World.TileToPixels(new Point<int>(3, 14));
             world.AddActor(actorA);
             world.AddActor(actorB);
 
             actorA.AddPriority(new behavior.MoveTo(world.map, actorA, actorB));
-            world.StartSimulation(1);
+            world.StartSimulation(10);
         }
     }
 }

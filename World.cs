@@ -36,18 +36,19 @@ namespace life
             map = new Layer<Tile>(width, height);
             items = new Layer<Tile>(width, height);
         }
-        const long DATETIME_TICKS_PER_SEC = 10000000;
+        const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
         public void Tick()
         {
-            Console.WriteLine("tick");
-            var now = new DateTime().Ticks;
-            if (_lastTick >= 0)
+            var now = DateTime.Now.Ticks;
+            if (_lastTick > 0)
             {
                 var delta = now - _lastTick;
 
-                float fDelta = ((float)delta) * DATETIME_TICKS_PER_SEC;
-                float fNow = ((float)now) * DATETIME_TICKS_PER_SEC;
+                float fDelta = ((float)delta) / DATETIME_TICKS_PER_SEC;
+                float fNow = ((float)now) / DATETIME_TICKS_PER_SEC;
+
+                //Console.WriteLine(string.Format("{0:0.00000}", fDelta));
 
                 // loop through actors, giving them their time slice
                 foreach (var actor in _actors)
