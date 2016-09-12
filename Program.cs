@@ -236,11 +236,69 @@ namespace life
             Console.Error.WriteLine("Couldn't open " + path);
             return null;
         }
+        static void LayerFloodFill(Layer<life.Tile> layer, Point<int> point, char fillColor)
+        {
+            // adapted from https://simpledevcode.wordpress.com/2015/12/29/flood-fill-algorithm-using-c-net/
+            Stack<Point<int>> points = new Stack<Point<int>>();
+
+            var targetColor = layer.Get(point).type;
+            if (targetColor == fillColor)
+            {
+                return;
+            }
+
+            points.Push(point);
+            while (points.Count > 0)
+            {
+                Point<int> temp = points.Pop();
+                int y1 = temp.y;
+                while (y1 >= 0 && layer.Get(temp.x, y1).type == targetColor)
+                {
+                    --y1;
+                }
+                ++y1;
+
+                bool spanLeft = false;
+                bool spanRight = false;
+                while (y1 < layer.height && layer.Get(temp.x, y1).type == targetColor)
+                {
+                    layer.Set(temp.x, y1, new life.Tile(fillColor));
+                    if (!spanLeft && temp.x > 0 && layer.Get(temp.x - 1, y1).type == targetColor)
+                    {
+                        points.Push(new Point<int>(temp.x - 1, y1));
+                        spanLeft = true;
+                    }
+                    else if (spanLeft && temp.x - 1 == 0 && layer.Get(temp.x - 1, y1).type != targetColor)
+                    {
+                        spanLeft = false;
+                    }
+                    if (!spanRight && temp.x < layer.width - 1 && layer.Get(temp.x + 1, y1).type == targetColor)
+                    {
+                        points.Push(new Point<int>(temp.x + 1, y1));
+                        spanRight = true;
+                    }
+                    else if (spanRight && temp.x < layer.width - 1 && layer.Get(temp.x + 1, y1).type != targetColor)
+                    {
+                        spanRight = false;
+                    }
+                    ++y1;
+                }
+            }
+        }
         static void RoomDetectionTest()
         {
             var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
 
             Console.WriteLine(layer);
+
+            //LayerFloodFill(layer, new Point<int>(0, 0), '-');
+            //LayerFloodFill(layer, new Point<int>(4, 1), '-');
+            LayerFloodFill(layer, new Point<int>(5, 8), '-');
+            //LayerFloodFill(layer, new Point<int>(34, 8), '-');
+            //LayerFloodFill(layer, new Point<int>(layer.width-2, layer.height-1), '-');
+
+            Console.WriteLine(layer);
+
         }
     }
 }
