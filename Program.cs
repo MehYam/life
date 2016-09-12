@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,8 @@ namespace life
             //PerlinTest();
             //MapTest();
             //PathfindTest();
-            GameWorldTest();
+            //PathfindTravelTest();
+            RoomDetectionTest();
         }
         static void ArrayTest()
         {
@@ -189,7 +191,7 @@ namespace life
             search.PathFind(layer, (Tile t) => Tile.IsPassable(t.type), new Point<int>(0, 0), new Point<int>(99, 19));
             RenderPath(layer, search);
         }
-        static void GameWorldTest()
+        static void PathfindTravelTest()
         {
             var world = new World(100, 20);
             var noise = new Perlin();
@@ -211,6 +213,34 @@ namespace life
 
             actorA.AddPriority(new behavior.MoveTo(world.map, actorA, actorB));
             world.StartSimulation(10);
+        }
+        static Layer<life.Tile> LoadLayerFile(string path)
+        {
+            if (File.Exists(path))
+            {
+                string contents = File.ReadAllText(path);
+                var lines = contents.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+                var retval = new Layer<life.Tile>(lines[0].Length, lines.Length);
+
+                for (int y = 0; y < lines.Length; ++y)
+                {
+                    var line = lines[y];
+                    var extent = Math.Min(line.Length, retval.width);
+                    for (int x = 0; x < line.Length; ++x)
+                    {
+                        retval.Set(new Point<int>(x, y), new life.Tile(line[x]));
+                    }
+                }
+                return retval;
+            }
+            Console.Error.WriteLine("Couldn't open " + path);
+            return null;
+        }
+        static void RoomDetectionTest()
+        {
+            var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+
+            Console.WriteLine(layer);
         }
     }
 }
