@@ -8,17 +8,28 @@ namespace life
 {
     sealed class Layer<T>
     {
+        readonly T[,] tiles;
+
         public readonly int width;
         public readonly int height;
-
-        readonly T[,] tiles;
 
         public Layer(int width, int height)
         {
             tiles = new T[width, height];
-
             this.width = width;
             this.height = height;
+        }
+        public Layer(Layer<T> rhs)
+        {
+            tiles = new T[rhs.width, rhs.height];
+            this.width = rhs.width;
+            this.height = rhs.height;
+
+            ForEach((x, y, tile) =>
+            {
+                //KAI: latent bug - this is a shallow copy, which happens to work now because T is always a value type (i.e. struct Tile)
+                tiles[x, y] = rhs.Get(x, y);
+            });
         }
         public T Get(int x, int y)
         {
@@ -36,7 +47,6 @@ namespace life
         {
             tiles[pos.x, pos.y] = t;
         }
-
         /// <summary>
         ///  Iterate the layer, invoking the callback with (x, y, item) arguments
         /// </summary>
