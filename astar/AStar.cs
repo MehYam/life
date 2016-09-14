@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace life.astar
+namespace lifeEngine.astar
 { 
     /// <summary>
     /// From http://xfleury.github.io/graphsearch.html

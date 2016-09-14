@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace life.behavior
+namespace lifeEngine.behavior
 {
     class Wander : IBehavior
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace life
+namespace lifeEngine
 {
     class Program
     {
@@ -374,7 +374,7 @@ namespace life
 
             // first, set the outside temperatures to 0 and indoors to 9
             const float AMBIENT = 0;
-            const float INDOOR = 9;
+            const float INDOOR = 9  ;
             temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? AMBIENT : INDOOR);
 
             while (true)

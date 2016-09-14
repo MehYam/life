@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using life.astar;
+using lifeEngine.astar;
 
-namespace life
+namespace lifeEngine
 {
     //KAI: This class is JANKY. I'll replace it with something cleaner layer.
 

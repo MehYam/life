@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using life.behavior;
+using lifeEngine.behavior;
 
-namespace life
+namespace lifeEngine
 {
     class Actor : ITickHandler
     {

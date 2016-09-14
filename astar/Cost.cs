@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace life.astar
+namespace lifeEngine.astar
 {
     public struct Cost : IComparable<Cost>
     {
