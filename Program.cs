@@ -19,7 +19,8 @@ namespace life
             //PathfindTest();
             //PathfindTravelTest();
             //FloodFillTest();
-            RoomDetectionTest();
+            //RoomDetectionTest();
+            ThermodynamicsTest();
         }
         static void ArrayTest()
         {
@@ -97,7 +98,7 @@ namespace life
         static void PopulateLayer(Layer<TestTile> layer)
         {
             var noise = new Perlin();
-            layer.Fill((int x, int y, TestTile oldTile) =>
+            layer.Fill((x, y, oldTile) =>
             {
                 double perlin = noise.perlin(x + 0.5, y + 0.5, 0);
 
@@ -107,7 +108,7 @@ namespace life
         }
         static void PopulateMap(Map<TestTile> map)
         {
-            map.ForEachLayer((Layer<TestTile> layer) => PopulateLayer(layer));
+            map.ForEachLayer(layer => PopulateLayer(layer));
         }
         static void MapTest()
         { 
@@ -117,7 +118,7 @@ namespace life
 
             // populate it
             var random = new Random();
-            map.ForEachLayer((Layer<int> layer) =>
+            map.ForEachLayer(layer =>
             {
                 layer.Fill((int x, int y, int oldTile) => random.Next(0, 100));
             });
@@ -160,7 +161,7 @@ namespace life
             Console.WriteLine(map);
 
             var search = new MapAStar<TestTile>();
-            search.PathFind(map.Get(0), (TestTile t) => TestTile.IsPassable(t.type), new Point<int>(2, 0), new Point<int>(98, 19));
+            search.PathFind(map.Get(0), t => TestTile.IsPassable(t.type), new Point<int>(2, 0), new Point<int>(98, 19));
 
             RenderPath(map.Get(0), search);
 
@@ -170,7 +171,7 @@ namespace life
             var layer = new Layer<TestTile>(100, 20);
 
             // create a bunch of walls
-            layer.Fill((int x, int y, TestTile oldTile) =>
+            layer.Fill((x, y, oldTile) =>
             {
                 return new TestTile('.');
             });
@@ -304,8 +305,6 @@ namespace life
         {
             var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
 
-            Console.WriteLine(layer);
-
             //LayerFloodFill(layer, new Point<int>(0, 0), '-');
             //LayerFloodFill(layer, new Point<int>(4, 1), '-');
             LayerFloodFill(layer, new Point<int>(5, 8), '-');
@@ -314,10 +313,8 @@ namespace life
 
             Console.WriteLine(layer);
         }
-        static void RoomDetectionTest()
+        static Layer<Tile> DetectRooms(Layer<Tile> layer)
         {
-            var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
-
             // flood fill each unique contiguous empty region with something unique.  We'll make a copy first so as to
             // not disturb the original map
             var layerCopy = new Layer<Tile>(layer);
@@ -332,8 +329,77 @@ namespace life
                     ++region;
                 }
             });
+            return layerCopy;
+        }
+        static void RoomDetectionTest()
+        {
+            var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var layerRooms = DetectRooms(layer);
 
-            Console.WriteLine(layerCopy);
+            Console.WriteLine(layerRooms);
+        }
+        static void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by)
+        {
+            var tempA = layerTemps.Get(ax, ay);
+            var tempB = layerTemps.Get(bx, by);
+
+            if (tempA != tempB)
+            {
+                var tileA = layer.Get(ax, ay);
+                var tileB = layer.Get(bx, by);
+                if (!tileA.IsOutside || !tileB.IsOutside)
+                {
+                    var temp = (tempA + tempB) / 2;
+                    layerTemps.Set(ax, ay, temp);
+                    layerTemps.Set(bx, by, temp);
+                }
+            }
+        }
+        static Layer<char> RenderHeat(Layer<float> temps)
+        {
+            var retval = new Layer<char>(temps.width, temps.height);
+            temps.ForEach((x, y, temp) =>
+            {
+                char tempChar = '@';
+                if (temp < -15) tempChar = ' ';
+                else if (temp < -10) tempChar = '.';
+                else if (temp < -5) tempChar = ',';
+                else if (temp < 0) tempChar = 'c';
+                else if (temp < 5) tempChar = 'o';
+                else if (temp < 10) tempChar = 'd';
+                else if (temp < 15) tempChar = 'B';
+                else if (temp < 20) tempChar = '8';
+
+                retval.Set(x, y, tempChar);
+            });
+            return retval;
+        }
+        static void ThermodynamicsTest()
+        {
+            var layer = DetectRooms(LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt"));
+
+            Console.WriteLine(layer);
+
+            var temps = new Layer<float>(layer.width, layer.height);
+
+            // first, set the outside temperature to -20
+            temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? -20 : 20);
+
+            while (true)
+            {
+                Console.WriteLine(RenderHeat(temps));
+
+                // next, loop all tiles, radiating warmer temps into colder ones
+                temps.ForEach((x, y, tile) =>
+                {
+                    if (x > 0) ExchangeHeat(layer, temps, x, y, x - 1, y);
+                    if (y > 0) ExchangeHeat(layer, temps, x, y, x, y - 1);
+                    if (x < layer.width - 1) ExchangeHeat(layer, temps, x, y, x + 1, y);
+                    if (y < layer.height - 1) ExchangeHeat(layer, temps, x, y, x, y + 1);
+                });
+
+                Console.ReadKey();
+            }
         }
     }
 }

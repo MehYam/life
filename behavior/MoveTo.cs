@@ -21,7 +21,7 @@ namespace life.behavior
             // determine the path, set the actor along it
             var search = new MapAStar<Tile>();
 
-            search.PathFind(map, (Tile t) => Tile.IsPassable(t.type), World.PixelsToTile(mover.pixelPos), World.PixelsToTile(target.pixelPos));
+            search.PathFind(map, t => { return t.IsPassable; }, World.PixelsToTile(mover.pixelPos), World.PixelsToTile(target.pixelPos));
 
             // There's no deque in C#.  To avoid shifting the array each time we remove an item, just reverse the list and work backward.
             search.result.Reverse();

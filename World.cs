@@ -88,16 +88,20 @@ namespace life
             running = false;
         }
     }
-    struct Tile
+    class Tile
     {
         public static char[] types = { 'O', 'o', '.', ' ', '#' };
-        public static bool IsPassable(char type) { return type == ' ' || type == '.'; }
 
         public readonly char type;
         public Tile(char type)
         {
             this.type = type;
         }
+        //KAI: hacks for now, until things get formalized a bit more
+        public bool IsWall { get { return type == '#'; } }
+        public bool IsOutside {  get { return type == 'a' || type == ' '; } }
+        public bool IsRoom { get { return type > 'a' && type < 'z';  } }
+        public bool IsPassable { get { return type == '.' || IsOutside; } }
         public override string ToString()
         {
             return type.ToString();
