@@ -355,22 +355,12 @@ namespace life
                 }
             }
         }
-        static Layer<char> RenderHeat(Layer<float> temps)
+        static Layer<string> RenderHeat(Layer<float> temps)
         {
-            var retval = new Layer<char>(temps.width, temps.height);
+            var retval = new Layer<string>(temps.width, temps.height);
             temps.ForEach((x, y, temp) =>
             {
-                char tempChar = '@';
-                if (temp < -15) tempChar = ' ';
-                else if (temp < -10) tempChar = '.';
-                else if (temp < -5) tempChar = ',';
-                else if (temp < 0) tempChar = 'c';
-                else if (temp < 5) tempChar = 'o';
-                else if (temp < 10) tempChar = 'd';
-                else if (temp < 15) tempChar = 'B';
-                else if (temp < 20) tempChar = '8';
-
-                retval.Set(x, y, tempChar);
+                retval.Set(x, y, string.Format("{0} ", (int)Math.Round(temp)));
             });
             return retval;
         }
@@ -382,11 +372,14 @@ namespace life
 
             var temps = new Layer<float>(layer.width, layer.height);
 
-            // first, set the outside temperature to -20
-            temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? -20 : 20);
+            // first, set the outside temperatures to 0 and indoors to 9
+            const float AMBIENT = 0;
+            const float INDOOR = 9;
+            temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? AMBIENT : INDOOR);
 
             while (true)
             {
+                Console.WriteLine();
                 Console.WriteLine(RenderHeat(temps));
 
                 // next, loop all tiles, radiating warmer temps into colder ones
@@ -398,6 +391,18 @@ namespace life
                     if (y < layer.height - 1) ExchangeHeat(layer, temps, x, y, x, y + 1);
                 });
 
+                // next, "accelerate" all outdoor temps to the ambient temperature
+                temps.ForEach((x, y, tile) =>
+                {
+                    if (layer.Get(x, y).IsOutside)
+                    {
+                        var temp = temps.Get(x, y);
+                        if (temp != AMBIENT)
+                        {
+                            temps.Set(x, y, (temp + AMBIENT) / 2);
+                        }
+                    }
+                });
                 Console.ReadKey();
             }
         }
