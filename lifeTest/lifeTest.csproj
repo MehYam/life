@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{310A116A-1D21-44F2-890D-8DAE739FF9DA}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{82F4B572-3BE5-4EB1-86A9-D0B291B83139}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>life</RootNamespace>
-    <AssemblyName>life</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <RootNamespace>lifeTest</RootNamespace>
+    <AssemblyName>lifeTest</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,9 +32,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -47,31 +43,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actor.cs" />
-    <Compile Include="astar\AStar.cs" />
-    <Compile Include="astar\Cost.cs" />
-    <Compile Include="astar\PriorityQueue.cs" />
-    <Compile Include="behavior\IBehavior.cs" />
-    <Compile Include="behavior\ITickHandler.cs" />
-    <Compile Include="behavior\MoveTo.cs" />
-    <Compile Include="behavior\Wander.cs" />
-    <Compile Include="Map.cs" />
-    <Compile Include="MapAStar.cs" />
-    <Compile Include="MapRegion.cs" />
-    <Compile Include="PerlinNoise.cs" />
-    <Compile Include="Point.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\life.csproj">
+      <Project>{310a116a-1d21-44f2-890d-8dae739ff9da}</Project>
+      <Name>life</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy $(TargetDir)\$(TargetFileName) C:\source\unity\life\Assets</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

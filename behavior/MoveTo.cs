@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace lifeEngine.behavior
 {
-    class MoveTo : IBehavior
+    public class MoveTo : IBehavior
     {
         readonly Actor mover;
         readonly Actor target;  // this should instead be a generic target, which can be either an Actor or location on the map

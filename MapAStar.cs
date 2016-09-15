@@ -12,7 +12,7 @@ namespace lifeEngine
     // so logically you could create big immovable arrays of them to store results and index things around to
     // acheive the same memory re-use... *if* you needed to.  This should really be replaced with a better
     // implementation, but I need to get rolling.
-    class MapAStar<TTile> : AStar<Point<int>, Cost>
+    public class MapAStar<TTile> : AStar<Point<int>, Cost>
     {
         const int baseOrthogonalCost = 5;
         const int baseDiagonalCost = 7;

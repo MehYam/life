@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace lifeEngine
 {
-    sealed class Layer<T>
+    public sealed class Layer<T>
     {
         readonly T[,] tiles;
 
@@ -91,7 +90,7 @@ namespace lifeEngine
             return sb.ToString();
         }
     }
-    sealed class Map<T>
+    public sealed class Map<T>
     {
         public readonly int width;
         public readonly int height;

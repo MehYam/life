@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace lifeEngine
 {
-    static class Util
+    public static class Util
     {
         // Because C# can't support math on generics...
         //KAI: could use extensions and C# version of specialization?

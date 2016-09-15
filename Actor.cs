@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using lifeEngine.behavior;
 
 namespace lifeEngine
 {
-    class Actor : ITickHandler
+    public class Actor : ITickHandler
     {
         public readonly char type;
         public readonly float speedTPS = 1;

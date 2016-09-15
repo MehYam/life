@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace lifeEngine
 {
-    sealed class World
+    public sealed class World
     {
         public const int PIXELS_PER_TILE = 100;
         public static Point<int> PixelsToTile(Point<float> pixels)
@@ -88,7 +87,7 @@ namespace lifeEngine
             running = false;
         }
     }
-    class Tile
+    public class Tile
     {
         public static char[] types = { 'O', 'o', '.', ' ', '#' };
 
