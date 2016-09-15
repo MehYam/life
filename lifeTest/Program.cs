@@ -218,28 +218,6 @@ namespace lifeTest
             actorA.AddPriority(new lifeEngine.behavior.MoveTo(world.map, actorA, actorB));
             world.StartSimulation(10);
         }
-        static Layer<Tile> LoadLayerFile(string path)
-        {
-            if (File.Exists(path))
-            {
-                string contents = File.ReadAllText(path);
-                var lines = contents.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-                var retval = new Layer<Tile>(lines[0].Length, lines.Length);
-
-                for (int y = 0; y < lines.Length; ++y)
-                {
-                    var line = lines[y];
-                    var extent = Math.Min(line.Length, retval.width);
-                    for (int x = 0; x < line.Length; ++x)
-                    {
-                        retval.Set(new Point<int>(x, y), new Tile(line[x]));
-                    }
-                }
-                return retval;
-            }
-            Console.Error.WriteLine("Couldn't open " + path);
-            return null;
-        }
         static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char fillColor)
         {
             return LayerFloodFill(layer, start, layer.Get(start).type, fillColor);
@@ -305,7 +283,7 @@ namespace lifeTest
         }
         static void FloodFillTest()
         {
-            var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
 
             //LayerFloodFill(layer, new Point<int>(0, 0), '-');
             //LayerFloodFill(layer, new Point<int>(4, 1), '-');
@@ -368,7 +346,7 @@ namespace lifeTest
         }
         static void ThermodynamicsTest()
         {
-            var layer = DetectRooms(LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt"));
+            var layer = DetectRooms(Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt"));
 
             Console.WriteLine(layer);
 

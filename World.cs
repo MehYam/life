@@ -7,7 +7,7 @@ namespace lifeEngine
 {
     public sealed class World
     {
-        public const int PIXELS_PER_TILE = 100;
+        public const int PIXELS_PER_TILE = 64; //KAI: this should be modifiable
         public static Point<int> PixelsToTile(Point<float> pixels)
         {
             return new Point<int>((int)pixels.x / PIXELS_PER_TILE, (int)pixels.y / PIXELS_PER_TILE);
