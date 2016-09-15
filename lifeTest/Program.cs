@@ -313,7 +313,7 @@ namespace lifeTest
         }
         static void RoomDetectionTest()
         {
-            var layer = LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
             var layerRooms = DetectRooms(layer);
 
             Console.WriteLine(layerRooms);
