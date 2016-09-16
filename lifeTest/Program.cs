@@ -19,10 +19,10 @@ namespace lifeTest
             //PerlinTest();
             //MapTest();
             //PathfindTest();
-            //PathfindTravelTest();
+            PathfindTravelTest();
             //FloodFillTest();
             //RoomDetectionTest();
-            ThermodynamicsTest();
+            //ThermodynamicsTest();
         }
         static void ArrayTest()
         {
@@ -210,8 +210,8 @@ namespace lifeTest
 
             var actorA = new Actor();
             var actorB = new Actor();
-            actorA.pixelPos = World.TileToPixels(new Point<int>(3, 0));
-            actorB.pixelPos = World.TileToPixels(new Point<int>(3, 14));
+            actorA.pos = new Point<float>(3, 0);
+            actorB.pos = new Point<float>(3, 14);
             world.AddActor(actorA);
             world.AddActor(actorB);
 

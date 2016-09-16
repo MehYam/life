@@ -7,27 +7,6 @@ namespace lifeEngine
 {
     public sealed class World
     {
-        public const int PIXELS_PER_TILE = 64; //KAI: this should be modifiable
-        public static Point<int> PixelsToTile(Point<float> pixels)
-        {
-            return new Point<int>((int)pixels.x / PIXELS_PER_TILE, (int)pixels.y / PIXELS_PER_TILE);
-        }
-        public static Point<int> PixelsToTileRemainder(Point<float> pixels)
-        {
-            return new Point<int>((int)pixels.x % PIXELS_PER_TILE, (int)pixels.y % PIXELS_PER_TILE);
-        }
-        /// <summary>
-        /// Returns the pixel position at the center of 'tile'
-        /// </summary>
-        /// <param name="tile"></param>
-        /// <returns></returns>
-        public static Point<float> TileToPixels(Point<int> tile)
-        {
-            return new Point<float>(
-                tile.x * PIXELS_PER_TILE + PIXELS_PER_TILE / 2,
-                tile.y * PIXELS_PER_TILE + PIXELS_PER_TILE / 2
-            );
-        }
         public Layer<Tile> map { get; set; }  //KAI: encaps.
         public Layer<Tile> items { get; set; }
         public World(int width, int height)
@@ -64,6 +43,7 @@ namespace lifeEngine
         }
         public void Tick(float time, float deltaTime)
         {
+            //KAI: apples and oranges with the two Tick calls w.r.t. _lastTick
             foreach (var actor in _actors)
             {
                 actor.FixedUpdate(time, deltaTime);
@@ -76,6 +56,10 @@ namespace lifeEngine
             {
                 _actors.Add(a);
             }
+        }
+        public void RemoveActor(Actor a)
+        {
+            _actors.Remove(a);
         }
 
         bool running;

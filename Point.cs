@@ -44,5 +44,16 @@ namespace lifeEngine
         {
             return !a.Equals(b);
         }
-    }              
+    }
+    public static class PointSpecialization
+    {
+        public static Point<float> ToFloat(this Point<int> point)
+        {
+            return new Point<float>(point.x, point.y);
+        }
+        public static Point<int> ToInt(this Point<float> point)
+        {
+            return new Point<int>((int)Math.Round(point.x), (int)Math.Round(point.y));
+        }
+    }
 }

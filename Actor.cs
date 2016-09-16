@@ -11,7 +11,7 @@ namespace lifeEngine
     {
         public readonly char type;
         public readonly float speedTPS = 1;
-        public Point<float> pixelPos = new Point<float>(0, 0);
+        public Point<float> pos = new Point<float>(0, 0);  // Actors get sub-tile precision
         public Actor(char type = 'A')
         {
             this.type = type;
@@ -34,7 +34,7 @@ namespace lifeEngine
         }
         public override string ToString()
         {
-            return string.Format("{0}, ({1})", type, pixelPos);
+            return string.Format("{0}, ({1})", type, pos);
         }
     }
 }

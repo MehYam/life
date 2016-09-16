@@ -20,7 +20,7 @@ namespace lifeEngine.behavior
             // determine the path, set the actor along it
             var search = new MapAStar<Tile>();
 
-            search.PathFind(map, t => { return t.IsPassable; }, World.PixelsToTile(mover.pixelPos), World.PixelsToTile(target.pixelPos));
+            search.PathFind(map, t => { return t.IsPassable; }, mover.pos.ToInt(), target.pos.ToInt());
 
             // There's no deque in C#.  To avoid shifting the array each time we remove an item, just reverse the list and work backward.
             search.result.Reverse();
@@ -31,39 +31,34 @@ namespace lifeEngine.behavior
             if (!IsComplete)
             {
                 float travelSoFar = 0;
-                float speed = mover.speedTPS * World.PIXELS_PER_TILE;
+                float speed = mover.speedTPS;
                 float maxTravel = deltaTime * speed;
 
                 while (!IsComplete && travelSoFar < maxTravel)
                 {
-                    Point<float> currentDestination = World.TileToPixels(path.Last());
+                    Point<float> currentDestination = path.Last().ToFloat();
 
                     // if the current tile destination is reached, pull it off the queue and start the next one
-                    if (Util.NearlyEqual(mover.pixelPos, currentDestination))
+                    if (Util.NearlyEqual(mover.pos, currentDestination))
                     {
                         path.RemoveAt(path.Count - 1);
                         continue;
                     }
 #if DEBUG_MOVE
-                    Point<float> debug = mover.pixelPos;
+                    Point<float> debug = mover.pos;
 #endif
                     // move the actor to the next tile
-                    Point<float> currentVector = Util.Subtract(currentDestination, mover.pixelPos);
+                    Point<float> currentVector = Util.Subtract(currentDestination, mover.pos);
 
                     float travelToCurrent = Util.Magnitude(currentVector);
                     float travelNow = Math.Min(maxTravel, travelToCurrent);
                     Point<float> currentVectorNormalized = Util.Divide(currentVector, travelToCurrent);
 
-                    mover.pixelPos = Util.Add(mover.pixelPos, Util.Multiply(currentVectorNormalized, travelNow));
+                    mover.pos = Util.Add(mover.pos, Util.Multiply(currentVectorNormalized, travelNow));
                     travelSoFar += travelNow;
 
 #if DEBUG_MOVE
-                    Console.WriteLine(string.Format("Actor move from {0}({1}) to {2}({3})",
-                        debug,
-                        World.PixelsToTile(debug),
-                        mover.pixelPos,
-                        World.PixelsToTile(mover.pixelPos))
-                    );
+                    Console.WriteLine(string.Format("Actor move from {0} to {1}", debug, mover.pos));
 #endif
                 }
             }
