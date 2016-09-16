@@ -61,6 +61,14 @@ namespace lifeEngine
         {
             _actors.Remove(a);
         }
+        public Actor FindActor(Func<Actor, bool> find)
+        {
+            foreach (var actor in _actors)
+            {
+                if (find(actor)) return actor;
+            }
+            return null;
+        }
 
         bool running;
         /// <summary>
