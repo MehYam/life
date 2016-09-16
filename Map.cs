@@ -9,20 +9,16 @@ namespace lifeEngine
     {
         readonly T[,] tiles;
 
-        public readonly int width;
-        public readonly int height;
-
+        public readonly Point<int> size;
         public Layer(int width, int height)
         {
             tiles = new T[width, height];
-            this.width = width;
-            this.height = height;
+            this.size = new Point<int>(width, height);
         }
         public Layer(Layer<T> rhs)
         {
-            tiles = new T[rhs.width, rhs.height];
-            this.width = rhs.width;
-            this.height = rhs.height;
+            tiles = new T[rhs.size.x, rhs.size.y];
+            this.size = new Point<int>(rhs.size.x, rhs.size.y);
 
             ForEach((x, y, tile) =>
             {
@@ -52,9 +48,9 @@ namespace lifeEngine
         /// <param name="callback"></param>
         public void ForEach(Action<int, int, T> callback)
         {
-            for (var y = 0; y < height; ++y)
+            for (var y = 0; y < size.y; ++y)
             {
-                for (var x = 0; x < width; ++x)
+                for (var x = 0; x < size.x; ++x)
                 {
                     callback(x, y, tiles[x, y]);
                 }
@@ -62,9 +58,9 @@ namespace lifeEngine
         }
         public void Fill(Func<int, int, T, T> callback)
         {
-            for (var y = 0; y < height; ++y)
+            for (var y = 0; y < size.y; ++y)
             {
-                for (var x = 0; x < width; ++x)
+                for (var x = 0; x < size.x; ++x)
                 {
                     tiles[x, y] = callback(x, y, tiles[x, y]);
                 }

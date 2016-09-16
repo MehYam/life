@@ -35,6 +35,11 @@ namespace lifeEngine
             map = new Layer<Tile>(width, height);
             items = new Layer<Tile>(width, height);
         }
+        public World(Layer<Tile> mapLayer)
+        {
+            map = mapLayer;
+            items = new Layer<Tile>(mapLayer.size.x, mapLayer.size.y);
+        }
         const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
         public void Tick()
@@ -56,6 +61,13 @@ namespace lifeEngine
                 }
             }
             _lastTick = now;
+        }
+        public void Tick(float time, float deltaTime)
+        {
+            foreach (var actor in _actors)
+            {
+                actor.FixedUpdate(time, deltaTime);
+            }
         }
         List<Actor> _actors = new List<Actor>();
         public void AddActor(Actor a)

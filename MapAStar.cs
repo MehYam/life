@@ -27,7 +27,7 @@ namespace lifeEngine
                     if (!(x == 0 && y == 0))
                     {
                         Point<int> newPos = new Point<int>(node.position.x + x, node.position.y + y);
-                        if (newPos.x >= 0 && newPos.x < _layer.width && newPos.y >= 0 && newPos.y < _layer.height)
+                        if (newPos.x >= 0 && newPos.x < _layer.size.x && newPos.y >= 0 && newPos.y < _layer.size.y)
                         {
                             if (_isTilePassable(_layer.Get(newPos.x, newPos.y)))
                             {
@@ -53,8 +53,8 @@ namespace lifeEngine
             return false;
         }
 
-        int ToIndex(Point<int> position) { return position.y * _layer.width + position.x; }
-        Point<int> ToPosition(int index) { return new Point<int>(index % _layer.width, index / _layer.width); }
+        int ToIndex(Point<int> position) { return position.y * _layer.size.x + position.x; }
+        Point<int> ToPosition(int index) { return new Point<int>(index % _layer.size.x, index / _layer.size.y); }
 
         static int GetDistance(Point<int> src, Point<int> dest)
         {

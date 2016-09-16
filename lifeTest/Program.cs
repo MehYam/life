@@ -177,14 +177,14 @@ namespace lifeTest
             {
                 return new TestTile('.');
             });
-            for (int c = 0; c < layer.width; c += 2)
+            for (int c = 0; c < layer.size.x; c += 2)
             {
-                for (int r = 1; r < layer.height; ++r)
+                for (int r = 1; r < layer.size.y; ++r)
                 {
                     layer.Set(c, r, new TestTile('x'));
                 }
                 c += 2;
-                for (int r = 0; r < layer.height - 1; ++r)
+                for (int r = 0; r < layer.size.y - 1; ++r)
                 {
                     layer.Set(c, r, new TestTile('x'));
                 }
@@ -253,7 +253,7 @@ namespace lifeTest
 
                 bool spanLeft = false;
                 bool spanRight = false;
-                while (y1 < layer.height && fillCondition(new Point<int>(temp.x, y1)))
+                while (y1 < layer.size.y && fillCondition(new Point<int>(temp.x, y1)))
                 {
                     fillAction(new Point<int>(temp.x, y1));
                     ++pointsColored;
@@ -267,12 +267,12 @@ namespace lifeTest
                     {
                         spanLeft = false;
                     }
-                    if (!spanRight && temp.x < layer.width - 1 && fillCondition(new Point<int>(temp.x + 1, y1)))
+                    if (!spanRight && temp.x < layer.size.x - 1 && fillCondition(new Point<int>(temp.x + 1, y1)))
                     {
                         points.Push(new Point<int>(temp.x + 1, y1));
                         spanRight = true;
                     }
-                    else if (spanRight && temp.x < layer.width - 1 && fillCondition(new Point<int>(temp.x + 1, y1)))
+                    else if (spanRight && temp.x < layer.size.x - 1 && fillCondition(new Point<int>(temp.x + 1, y1)))
                     {
                         spanRight = false;
                     }
@@ -337,7 +337,7 @@ namespace lifeTest
         }
         static Layer<string> RenderHeat(Layer<float> temps)
         {
-            var retval = new Layer<string>(temps.width, temps.height);
+            var retval = new Layer<string>(temps.size.x, temps.size.y);
             temps.ForEach((x, y, temp) =>
             {
                 retval.Set(x, y, string.Format("{0} ", (int)Math.Round(temp)));
@@ -350,7 +350,7 @@ namespace lifeTest
 
             Console.WriteLine(layer);
 
-            var temps = new Layer<float>(layer.width, layer.height);
+            var temps = new Layer<float>(layer.size.x, layer.size.y);
 
             // first, set the outside temperatures to 0 and indoors to 9
             const float AMBIENT = 0;
@@ -367,8 +367,8 @@ namespace lifeTest
                 {
                     if (x > 0) ExchangeHeat(layer, temps, x, y, x - 1, y);
                     if (y > 0) ExchangeHeat(layer, temps, x, y, x, y - 1);
-                    if (x < layer.width - 1) ExchangeHeat(layer, temps, x, y, x + 1, y);
-                    if (y < layer.height - 1) ExchangeHeat(layer, temps, x, y, x, y + 1);
+                    if (x < layer.size.x - 1) ExchangeHeat(layer, temps, x, y, x + 1, y);
+                    if (y < layer.size.y - 1) ExchangeHeat(layer, temps, x, y, x, y + 1);
                 });
 
                 // next, "accelerate" all outdoor temps to the ambient temperature

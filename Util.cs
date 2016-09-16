@@ -85,5 +85,10 @@ namespace lifeEngine
         {
             return NearlyEqual(a.x, b.x) && NearlyEqual(a.y, b.y);
         }
+        public static bool Within(Point<int> testPoint, Point<int> min, Point<int> max)
+        {
+            return min.x <= testPoint.x && testPoint.x <= max.x && min.y <= testPoint.y && testPoint.y <= max.y;
+        }
+        public static readonly Point<int> zero = new Point<int>(0, 0);
     }
 }

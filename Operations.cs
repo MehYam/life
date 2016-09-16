@@ -19,7 +19,7 @@ namespace lifeEngine
                 for (int y = 0; y < lines.Length; ++y)
                 {
                     var line = lines[y];
-                    var extent = Math.Min(line.Length, retval.width);
+                    var extent = Math.Min(line.Length, retval.size.x);
                     for (int x = 0; x < line.Length; ++x)
                     {
                         retval.Set(new Point<int>(x, y), new Tile(line[x]));
