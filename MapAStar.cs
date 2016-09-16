@@ -54,7 +54,7 @@ namespace lifeEngine
         }
 
         int ToIndex(Point<int> position) { return position.y * _layer.size.x + position.x; }
-        Point<int> ToPosition(int index) { return new Point<int>(index % _layer.size.x, index / _layer.size.y); }
+        Point<int> ToPosition(int index) { return new Point<int>(index % _layer.size.x, index / _layer.size.x); }
 
         static int GetDistance(Point<int> src, Point<int> dest)
         {
