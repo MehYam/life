@@ -215,7 +215,7 @@ namespace lifeTest
             world.AddActor(actorA);
             world.AddActor(actorB);
 
-            actorA.AddPriority(new lifeEngine.behavior.MoveTo(world.map, actorA, actorB));
+            actorA.AddPriority(new lifeEngine.behavior.MoveTo(world.map, actorA, actorB.pos.ToInt()));
             world.StartSimulation(10);
         }
         static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char fillColor)

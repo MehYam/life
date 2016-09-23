@@ -21,7 +21,7 @@ namespace lifeEngine
         }
         const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
-        public void Tick()
+        void Tick()
         {
             var now = DateTime.Now.Ticks;
             if (_lastTick > 0)
@@ -32,12 +32,7 @@ namespace lifeEngine
                 float fNow = ((float)now) / DATETIME_TICKS_PER_SEC;
 
                 //Console.WriteLine(string.Format("{0:0.00000}", fDelta));
-
-                // loop through actors, giving them their time slice
-                foreach (var actor in _actors)
-                {
-                    actor.FixedUpdate(fNow, fDelta);
-                }
+                Tick(fNow, fDelta);
             }
             _lastTick = now;
         }
@@ -49,7 +44,7 @@ namespace lifeEngine
                 actor.FixedUpdate(time, deltaTime);
             }
         }
-        List<Actor> _actors = new List<Actor>();
+        readonly public List<Actor> _actors = new List<Actor>(); //KAI: shod
         public void AddActor(Actor a)
         {
             if (!_actors.Contains(a))

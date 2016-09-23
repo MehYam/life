@@ -10,19 +10,18 @@ namespace lifeEngine.behavior
     public class MoveTo : IBehavior
     {
         readonly Actor mover;
-        readonly Actor target;  // this should instead be a generic target, which can be either an Actor or location on the map
         readonly List<Point<int>> path;
-        public MoveTo(Layer<Tile> map, Actor mover, Actor target)
+        public MoveTo(Layer<Tile> map, Actor mover, Point<int> target)
         {
             this.mover = mover;
-            this.target = target;
 
             // determine the path, set the actor along it
             var search = new MapAStar<Tile>();
 
-            search.PathFind(map, t => { return t.IsPassable; }, mover.pos.ToInt(), target.pos.ToInt());
+            search.PathFind(map, t => { return t.IsPassable; }, mover.pos.ToInt(), target);
 
             // There's no deque in C#.  To avoid shifting the array each time we remove an item, just reverse the list and work backward.
+            //KAI: just turn this into LinkedList...
             search.result.Reverse();
             path = search.result;
         }
