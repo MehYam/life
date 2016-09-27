@@ -9,6 +9,7 @@ namespace lifeEngine
     {
         public Layer<Tile> map { get; set; }  //KAI: abstract these, appropriately.
         public Layer<Tile> items { get; set; }
+        public Layer<Tile> rooms { get; private set; }
         public Layer<float> temps { get; set; }
         public float outdoorTemperature { get; set; }
 
@@ -114,7 +115,29 @@ namespace lifeEngine
             }
             return null;
         }
+        //KAI: very very weak...
+        static Layer<Tile> DetectRooms(Layer<Tile> layer)
+        {
+            // flood fill each unique contiguous empty region with something unique.  We'll make a copy first so as to
+            // not disturb the original map
+            var layerCopy = new Layer<Tile>(layer);
+            Console.WriteLine(layerCopy);
 
+            char region = 'a';
+            layerCopy.ForEach((x, y, tile) =>
+            {
+                int tilesFilled = Util.LayerFloodFill(layerCopy, new Point<int>(x, y), ' ', region);
+                if (tilesFilled > 0)
+                {
+                    ++region;
+                }
+            });
+            return layerCopy;
+        }
+        public void RecalculateRooms()
+        {
+            rooms = DetectRooms(map);
+        }
         bool running;
         /// <summary>
         /// Starts the world's game loop

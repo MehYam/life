@@ -230,30 +230,13 @@ namespace lifeTest
 
             Console.WriteLine(layer);
         }
-        static Layer<Tile> DetectRooms(Layer<Tile> layer)
-        {
-            // flood fill each unique contiguous empty region with something unique.  We'll make a copy first so as to
-            // not disturb the original map
-            var layerCopy = new Layer<Tile>(layer);
-            Console.WriteLine(layerCopy);
-
-            char region = 'a';
-            layerCopy.ForEach((x, y, tile) =>
-            {
-                int tilesFilled = Util.LayerFloodFill(layerCopy, new Point<int>(x, y), ' ', region);
-                if (tilesFilled > 0)
-                {
-                    ++region;
-                }
-            });
-            return layerCopy;
-        }
         static void RoomDetectionTest()
         {
             var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
-            var layerRooms = DetectRooms(layer);
+            var world = new World(layer);
+            world.RecalculateRooms();
 
-            Console.WriteLine(layerRooms);
+            Console.WriteLine(world.rooms);
         }
         static void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by)
         {
@@ -283,17 +266,18 @@ namespace lifeTest
         }
         static void ThermodynamicsTest()
         {
-            var layer = DetectRooms(Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt"));
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
             Console.WriteLine(layer);
 
             var world = new World(layer);
+            world.RecalculateRooms();
 
             // first, set the outside temperatures to 0 and indoors to 9
             const float AMBIENT = 0;
             const float INDOOR = 9;
 
             world.outdoorTemperature = AMBIENT;
-            world.temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? world.outdoorTemperature : INDOOR);
+            world.temps.Fill((x, y, tile) => world.rooms.Get(x, y).IsOutside ? world.outdoorTemperature : INDOOR);
 
             // next, punch ticks into the world, and render the heat as it conducts
             while (true)
