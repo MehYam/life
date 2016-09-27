@@ -10,7 +10,7 @@ namespace lifeEngine
     public class Actor : ITickHandler
     {
         public readonly char type;
-        public readonly float speedTPS = 1;
+        public readonly float speedTPS = 3;
         public Point<float> pos = new Point<float>(0, 0);  // Actors get sub-tile precision
         public Actor(char type = 'A')
         {

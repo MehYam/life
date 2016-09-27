@@ -19,10 +19,10 @@ namespace lifeTest
             //PerlinTest();
             //MapTest();
             //PathfindTest();
-            PathfindTravelTest();
+            //PathfindTravelTest();
             //FloodFillTest();
             //RoomDetectionTest();
-            //ThermodynamicsTest();
+            ThermodynamicsTest();
         }
         static void ArrayTest()
         {
@@ -216,7 +216,7 @@ namespace lifeTest
             world.AddActor(actorB);
 
             actorA.AddPriority(new lifeEngine.behavior.MoveTo(world.map, actorA, actorB.pos.ToInt()));
-            world.StartSimulation(10);
+            world.RunSimulation(10);
         }
         static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char fillColor)
         {
@@ -347,42 +347,23 @@ namespace lifeTest
         static void ThermodynamicsTest()
         {
             var layer = DetectRooms(Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt"));
-
             Console.WriteLine(layer);
 
-            var temps = new Layer<float>(layer.size.x, layer.size.y);
+            var world = new World(layer);
 
             // first, set the outside temperatures to 0 and indoors to 9
             const float AMBIENT = 0;
             const float INDOOR = 9;
-            temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? AMBIENT : INDOOR);
+            world.temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? AMBIENT : INDOOR);
 
+            // next, punch ticks into the world, and render the heat as it conducts
             while (true)
             {
                 Console.WriteLine();
-                Console.WriteLine(RenderHeat(temps));
+                Console.WriteLine(RenderHeat(world.temps));
 
-                // next, loop all tiles, radiating warmer temps into colder ones
-                temps.ForEach((x, y, tile) =>
-                {
-                    if (x > 0) ExchangeHeat(layer, temps, x, y, x - 1, y);
-                    if (y > 0) ExchangeHeat(layer, temps, x, y, x, y - 1);
-                    if (x < layer.size.x - 1) ExchangeHeat(layer, temps, x, y, x + 1, y);
-                    if (y < layer.size.y - 1) ExchangeHeat(layer, temps, x, y, x, y + 1);
-                });
+                world.Tick(0, 0);
 
-                // next, "accelerate" all outdoor temps to the ambient temperature
-                temps.ForEach((x, y, tile) =>
-                {
-                    if (layer.Get(x, y).IsOutside)
-                    {
-                        var temp = temps.Get(x, y);
-                        if (temp != AMBIENT)
-                        {
-                            temps.Set(x, y, (temp + AMBIENT) / 2);
-                        }
-                    }
-                });
                 Console.ReadKey();
             }
         }
