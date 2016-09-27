@@ -218,76 +218,13 @@ namespace lifeTest
             actorA.AddPriority(new lifeEngine.behavior.MoveTo(world.map, actorA, actorB.pos.ToInt()));
             world.RunSimulation(10);
         }
-        static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char fillColor)
-        {
-            return LayerFloodFill(layer, start, layer.Get(start).type, fillColor);
-        }
-        static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char targetColor, char fillColor)
-        {
-            return LayerFloodFill(
-                layer,
-                start,
-                point => layer.Get(point).type == targetColor, // fillCondition
-                point => layer.Set(point, new Tile(fillColor)) // fillAction
-                );
-        }
-        static int LayerFloodFill(Layer<Tile> layer, Point<int> point, Func<Point<int>, bool> fillCondition, Action<Point<int>> fillAction)
-        {
-            // adapted from https://simpledevcode.wordpress.com/2015/12/29/flood-fill-algorithm-using-c-net/
-            if (!fillCondition(point))
-            {
-                return 0;
-            }
-            Stack<Point<int>> points = new Stack<Point<int>>();
-            points.Push(point);
-            int pointsColored = 0;
-            while (points.Count > 0)
-            {
-                Point<int> temp = points.Pop();
-                int y1 = temp.y;
-                while (y1 >= 0 && fillCondition(new Point<int>(temp.x, y1)))
-                {
-                    --y1;
-                }
-                ++y1;
-
-                bool spanLeft = false;
-                bool spanRight = false;
-                while (y1 < layer.size.y && fillCondition(new Point<int>(temp.x, y1)))
-                {
-                    fillAction(new Point<int>(temp.x, y1));
-                    ++pointsColored;
-
-                    if (!spanLeft && temp.x > 0 && fillCondition(new Point<int>(temp.x - 1, y1)))
-                    {
-                        points.Push(new Point<int>(temp.x - 1, y1));
-                        spanLeft = true;
-                    }
-                    else if (spanLeft && temp.x - 1 == 0 && fillCondition(new Point<int>(temp.x - 1, y1)))
-                    {
-                        spanLeft = false;
-                    }
-                    if (!spanRight && temp.x < layer.size.x - 1 && fillCondition(new Point<int>(temp.x + 1, y1)))
-                    {
-                        points.Push(new Point<int>(temp.x + 1, y1));
-                        spanRight = true;
-                    }
-                    else if (spanRight && temp.x < layer.size.x - 1 && fillCondition(new Point<int>(temp.x + 1, y1)))
-                    {
-                        spanRight = false;
-                    }
-                    ++y1;
-                }
-            }
-            return pointsColored;
-        }
         static void FloodFillTest()
         {
             var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
 
             //LayerFloodFill(layer, new Point<int>(0, 0), '-');
             //LayerFloodFill(layer, new Point<int>(4, 1), '-');
-            LayerFloodFill(layer, new Point<int>(5, 8), '-');
+            Util.LayerFloodFill(layer, new Point<int>(5, 8), '-');
             //LayerFloodFill(layer, new Point<int>(34, 8), '-');
             //LayerFloodFill(layer, new Point<int>(layer.width-2, layer.height-1), '-');
 
@@ -303,7 +240,7 @@ namespace lifeTest
             char region = 'a';
             layerCopy.ForEach((x, y, tile) =>
             {
-                int tilesFilled = LayerFloodFill(layerCopy, new Point<int>(x, y), ' ', region);
+                int tilesFilled = Util.LayerFloodFill(layerCopy, new Point<int>(x, y), ' ', region);
                 if (tilesFilled > 0)
                 {
                     ++region;
@@ -354,7 +291,9 @@ namespace lifeTest
             // first, set the outside temperatures to 0 and indoors to 9
             const float AMBIENT = 0;
             const float INDOOR = 9;
-            world.temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? AMBIENT : INDOOR);
+
+            world.outdoorTemperature = AMBIENT;
+            world.temps.Fill((x, y, tile) => layer.Get(x, y).IsOutside ? world.outdoorTemperature : INDOOR);
 
             // next, punch ticks into the world, and render the heat as it conducts
             while (true)

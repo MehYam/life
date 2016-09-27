@@ -1,4 +1,4 @@
-﻿#define DEBUG_MOVE
+﻿//#define DEBUG_MOVE
 
 using System;
 using System.Collections.Generic;
