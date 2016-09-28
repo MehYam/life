@@ -56,6 +56,20 @@ namespace lifeEngine
                 }
             }
         }
+        /// <summary>
+        /// Iterate every other tile in the layer, invoking the callback with (x, y, item) arguments
+        /// </summary>
+        /// <param name="callback"></param>
+        public void ForEveryOther(Action<int, int, T> callback)
+        {
+            for (var y = 0; y < size.y; ++y)
+            {
+                for (var x = y % 2; x < size.x; x += 2)
+                {
+                    callback(x, y, tiles[x, y]);
+                }
+            }
+        }
         public void Fill(Func<int, int, T, T> callback)
         {
             for (var y = 0; y < size.y; ++y)

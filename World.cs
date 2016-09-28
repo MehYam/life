@@ -13,16 +13,27 @@ namespace lifeEngine
         public Layer<float> temps { get; set; }
         public float outdoorTemperature { get; set; }
 
+        /// <summary>
+        /// This is in heat units per sec.  Denser items require more heat to change temperature, and
+        /// therefore change more slowly.
+        /// </summary>
+        public float heatTransferRate { get; set; }
+
         public World(int width, int height)
         {
             map = new Layer<Tile>(width, height);
             items = new Layer<Tile>(width, height);
+            temps = new Layer<float>(width, height);
+
+            heatTransferRate = 1;
         }
         public World(Layer<Tile> mapLayer)
         {
             map = mapLayer;
             items = new Layer<Tile>(mapLayer.size.x, mapLayer.size.y);
             temps = new Layer<float>(mapLayer.size.x, mapLayer.size.y);
+
+            heatTransferRate = 1;
         }
         const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
@@ -43,8 +54,8 @@ namespace lifeEngine
         }
         public void Tick(float time, float deltaTime)
         {
-            ConductHeat();
-            ApplyOutdoorTemperature();
+            SpreadHeat(deltaTime);
+            ApplyOutdoorHeat(deltaTime);
 
             //KAI: apples and oranges with the two Tick calls w.r.t. _lastTick
             foreach (var actor in _actors)
@@ -52,37 +63,73 @@ namespace lifeEngine
                 actor.FixedUpdate(time, deltaTime);
             }
         }
-        static void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by)
+        void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by, float maxHeatExchange)
         {
-            var tempA = layerTemps.Get(ax, ay);
-            var tempB = layerTemps.Get(bx, by);
+            float Ta = layerTemps.Get(ax, ay);
+            float Tb = layerTemps.Get(bx, by);
 
-            if (tempA != tempB)
+            if (!Util.NearlyEqual(Ta, Tb))
             {
-                var tileA = layer.Get(ax, ay);
-                var tileB = layer.Get(bx, by);
-                if (!tileA.IsOutside || !tileB.IsOutside)
+                var a = layer.Get(ax, ay);
+                var b = layer.Get(bx, by);
+
+                // Heat = Mass x Temp in our simplified thermodynamics model
+                float Ha = a.Mass * Ta;
+                float Hb = b.Mass * Tb;
+                float Htotal = Ha + Hb;
+
+                // Calculate the temperature both tiles would reach if they fully stabilized to equilibrium
+                float Tequilibrium = Htotal / (a.Mass + b.Mass);
+
+                // Exchange the heat over time
+                float Hdelta = (Tequilibrium - Ta) * a.Mass;
+                float HdeltaClamped = Util.Clamp(Hdelta, -maxHeatExchange, maxHeatExchange);
+
+                layerTemps.Set(ax, ay, Ta + (HdeltaClamped / a.Mass));
+                layerTemps.Set(bx, by, Tb - (HdeltaClamped / b.Mass));
+
+                if (ax == 3 && ay == 1)
+                Console.WriteLine(string.Format("({0},{1}) <=> ({2},{3}), Ta {4:0.00} Tb {5:0.00}, Teq {6:0.00}, Ta' {7:0.00}, Tb' {8:0.00}",
+                    ax,
+                    ay,
+                    bx,
+                    by,
+                    Ta,
+                    Tb,
+                    Tequilibrium,
+                    layerTemps.Get(ax, ay),
+                    layerTemps.Get(bx, by)
+                    ));
+            }
+        }
+        void SpreadHeat(float deltaTime)
+        {
+            // loop all tiles, radiating warmer temps into colder ones.  Do this in two passes for each of the horizontal
+            // and vertical directions to make the spread more uniform.
+            float maxHeatExchange = deltaTime * heatTransferRate;
+
+            for (var x = 1; x < temps.size.x; x += 2)
+            {
+                for (var y = 0; y < temps.size.y; ++y)
                 {
-                    var temp = (tempA + tempB) / 2;
-                    layerTemps.Set(ax, ay, temp);
-                    layerTemps.Set(bx, by, temp);
+                    ExchangeHeat(map, temps, x, y, x - 1, y, maxHeatExchange);
+                    if (x < map.size.x - 1) ExchangeHeat(map, temps, x, y, x + 1, y, maxHeatExchange);
+                }
+            }
+            for (var y = 1; y < temps.size.y; y += 2)
+            {
+                for (var x = 0; x < temps.size.x; ++x)
+                {
+                    ExchangeHeat(map, temps, x, y, x, y - 1, maxHeatExchange);
+                    if (y < map.size.y - 1) ExchangeHeat(map, temps, x, y, x, y + 1, maxHeatExchange);
                 }
             }
         }
-        void ConductHeat()
-        {
-            // loop all tiles, radiating warmer temps into colder ones
-            temps.ForEach((x, y, tile) =>
-            {
-                if (x > 0) ExchangeHeat(map, temps, x, y, x - 1, y);
-                if (y > 0) ExchangeHeat(map, temps, x, y, x, y - 1);
-                if (x < map.size.x - 1) ExchangeHeat(map, temps, x, y, x + 1, y);
-                if (y < map.size.y - 1) ExchangeHeat(map, temps, x, y, x, y + 1);
-            });
-        }
-        void ApplyOutdoorTemperature()
+        void ApplyOutdoorHeat(float deltaTime)
         {
             // trend outdoor tiles to the ambient weather-influenced temperature
+            const float airMass = 1; // KAI:
+            float maxTempExchange = deltaTime * heatTransferRate * airMass * .1f;
             temps.ForEach((x, y, tile) =>
             {
                 if (map.Get(x, y).IsOutside)
@@ -90,7 +137,7 @@ namespace lifeEngine
                     var temp = temps.Get(x, y);
                     if (temp != outdoorTemperature)
                     {
-                        temps.Set(x, y, (temp + outdoorTemperature) / 2);
+                        temps.Set(x, y, Util.Lerp(temp, outdoorTemperature, maxTempExchange));
                     }
                 }
             });
@@ -115,13 +162,12 @@ namespace lifeEngine
             }
             return null;
         }
-        //KAI: very very weak...
+        //KAI: very leaky abstractions here, need to think about the integrity of the World object
         static Layer<Tile> DetectRooms(Layer<Tile> layer)
         {
             // flood fill each unique contiguous empty region with something unique.  We'll make a copy first so as to
             // not disturb the original map
             var layerCopy = new Layer<Tile>(layer);
-            Console.WriteLine(layerCopy);
 
             char region = 'a';
             layerCopy.ForEach((x, y, tile) =>
@@ -176,6 +222,8 @@ namespace lifeEngine
         public bool IsOutside {  get { return type == 'a' || type == ' '; } }
         public bool IsRoom { get { return type > 'a' && type < 'z';  } }
         public bool IsPassable { get { return type == '.' || IsOutside; } }
+
+        public float Mass { get { return IsWall ? 100 : 1; } } // brick = 100 units, air = 1
         public override string ToString()
         {
             return type.ToString();

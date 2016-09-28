@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -238,35 +238,18 @@ namespace lifeTest
 
             Console.WriteLine(world.rooms);
         }
-        static void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by)
-        {
-            var tempA = layerTemps.Get(ax, ay);
-            var tempB = layerTemps.Get(bx, by);
-
-            if (tempA != tempB)
-            {
-                var tileA = layer.Get(ax, ay);
-                var tileB = layer.Get(bx, by);
-                if (!tileA.IsOutside || !tileB.IsOutside)
-                {
-                    var temp = (tempA + tempB) / 2;
-                    layerTemps.Set(ax, ay, temp);
-                    layerTemps.Set(bx, by, temp);
-                }
-            }
-        }
         static Layer<string> RenderHeat(Layer<float> temps)
         {
             var retval = new Layer<string>(temps.size.x, temps.size.y);
             temps.ForEach((x, y, temp) =>
             {
-                retval.Set(x, y, string.Format("{0} ", (int)Math.Round(temp)));
+                retval.Set(x, y, string.Format("{0:0.0}|", temp));
             });
             return retval;
         }
         static void ThermodynamicsTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms0.txt");
             Console.WriteLine(layer);
 
             var world = new World(layer);
@@ -280,14 +263,13 @@ namespace lifeTest
             world.temps.Fill((x, y, tile) => world.rooms.Get(x, y).IsOutside ? world.outdoorTemperature : INDOOR);
 
             // next, punch ticks into the world, and render the heat as it conducts
+            Console.WriteLine(RenderHeat(world.temps));
             while (true)
             {
-                Console.WriteLine();
-                Console.WriteLine(RenderHeat(world.temps));
-
-                world.Tick(0, 0);
-
                 Console.ReadKey();
+
+                world.Tick(0, 1);  // tick the world, one second at a time
+                Console.WriteLine(RenderHeat(world.temps));
             }
         }
     }
