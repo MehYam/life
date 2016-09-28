@@ -129,7 +129,8 @@ namespace lifeEngine
         {
             // trend outdoor tiles to the ambient weather-influenced temperature
             const float airMass = 1; // KAI:
-            float maxTempExchange = deltaTime * heatTransferRate * airMass * .1f;
+            const float fudgeTheRate = 0.5f;  // Not sure why, the heat is flowing too fast
+            float maxTempExchange = deltaTime * heatTransferRate * airMass * fudgeTheRate;
             temps.ForEach((x, y, tile) =>
             {
                 if (map.Get(x, y).IsOutside)
