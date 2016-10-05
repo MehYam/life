@@ -7,7 +7,7 @@ using System.Text;
 
 namespace lifeEngine.behavior
 {
-    public class MoveTo : IBehavior
+    public sealed class MoveTo : IBehavior
     {
         readonly Actor mover;
         readonly List<Point<int>> path;

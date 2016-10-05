@@ -243,13 +243,14 @@ namespace lifeTest
             var retval = new Layer<string>(temps.size.x, temps.size.y);
             temps.ForEach((x, y, temp) =>
             {
-                retval.Set(x, y, string.Format("{0:0.0}|", temp));
+//                retval.Set(x, y, string.Format("{0:0.0}|", temp));
+                retval.Set(x, y, string.Format("{0} ", Math.Round(temp)));
             });
             return retval;
         }
         static void ThermodynamicsTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms0.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms2.txt");
             Console.WriteLine(layer);
 
             var world = new World(layer);

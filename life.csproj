@@ -52,6 +52,7 @@
     <Compile Include="behavior\IBehavior.cs" />
     <Compile Include="behavior\ITickHandler.cs" />
     <Compile Include="behavior\MoveTo.cs" />
+    <Compile Include="behavior\TemperatureSource.cs" />
     <Compile Include="behavior\Wander.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapAStar.cs" />

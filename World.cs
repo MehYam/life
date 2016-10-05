@@ -88,18 +88,18 @@ namespace lifeEngine
                 layerTemps.Set(ax, ay, Ta + (HdeltaClamped / a.Mass));
                 layerTemps.Set(bx, by, Tb - (HdeltaClamped / b.Mass));
 
-                if (ax == 3 && ay == 1)
-                Console.WriteLine(string.Format("({0},{1}) <=> ({2},{3}), Ta {4:0.00} Tb {5:0.00}, Teq {6:0.00}, Ta' {7:0.00}, Tb' {8:0.00}",
-                    ax,
-                    ay,
-                    bx,
-                    by,
-                    Ta,
-                    Tb,
-                    Tequilibrium,
-                    layerTemps.Get(ax, ay),
-                    layerTemps.Get(bx, by)
-                    ));
+                //if (ax == 3 && ay == 1)
+                //Console.WriteLine(string.Format("({0},{1}) <=> ({2},{3}), Ta {4:0.00} Tb {5:0.00}, Teq {6:0.00}, Ta' {7:0.00}, Tb' {8:0.00}",
+                //    ax,
+                //    ay,
+                //    bx,
+                //    by,
+                //    Ta,
+                //    Tb,
+                //    Tequilibrium,
+                //    layerTemps.Get(ax, ay),
+                //    layerTemps.Get(bx, by)
+                //    ));
             }
         }
         void SpreadHeat(float deltaTime)
@@ -129,11 +129,11 @@ namespace lifeEngine
         {
             // trend outdoor tiles to the ambient weather-influenced temperature
             const float airMass = 1; // KAI:
-            const float fudgeTheRate = 0.5f;  // Not sure why, the heat is flowing too fast
+            const float fudgeTheRate = 0.2f;  // Not sure why, the heat is flowing too fast
             float maxTempExchange = deltaTime * heatTransferRate * airMass * fudgeTheRate;
             temps.ForEach((x, y, tile) =>
             {
-                if (map.Get(x, y).IsOutside)
+                if (rooms.Get(x, y).IsOutside)
                 {
                     var temp = temps.Get(x, y);
                     if (temp != outdoorTemperature)
