@@ -244,24 +244,30 @@ namespace lifeTest
             temps.ForEach((x, y, temp) =>
             {
 //                retval.Set(x, y, string.Format("{0:0.0}|", temp));
-                retval.Set(x, y, string.Format("{0} ", Math.Round(temp)));
+                retval.Set(x, y, string.Format("{0,4} ", Math.Round(temp)));
             });
             return retval;
         }
         static void ThermodynamicsTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms2.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms0.txt");
             Console.WriteLine(layer);
 
             var world = new World(layer);
             world.RecalculateRooms();
 
             // first, set the outside temperatures to 0 and indoors to 9
-            const float AMBIENT = 0;
-            const float INDOOR = 9;
+            const float AMBIENT = 5;
+            const float INDOOR = 25;
 
             world.outdoorTemperature = AMBIENT;
             world.temps.Fill((x, y, tile) => world.rooms.Get(x, y).IsOutside ? world.outdoorTemperature : INDOOR);
+
+            // add a heater
+            var heatSource = new Actor('t');
+            heatSource.pos = new Point<float>(7, 1);
+            heatSource.AddPriority(new lifeEngine.behavior.TemperatureSource(world, heatSource.pos.ToInt(), 40));
+            world.AddActor(heatSource);
 
             // next, punch ticks into the world, and render the heat as it conducts
             Console.WriteLine(RenderHeat(world.temps));
@@ -271,6 +277,7 @@ namespace lifeTest
 
                 world.Tick(0, 1);  // tick the world, one second at a time
                 Console.WriteLine(RenderHeat(world.temps));
+                Console.WriteLine();
             }
         }
     }

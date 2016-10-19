@@ -14,10 +14,10 @@ namespace lifeEngine
         public float outdoorTemperature { get; set; }
 
         /// <summary>
-        /// This is in heat units per sec.  Denser items require more heat to change temperature, and
-        /// therefore change more slowly.
+        /// How quickly heat spreads.  It's defined as the percentage of heat difference transferred per sec, range (0-1).
+        /// So, heatConductivity = 1 means it takes one second for heat to completely transfer, 0 means perfect insultation.
         /// </summary>
-        public float heatTransferRate { get; set; }
+        public float heatConductivity { get; set; }
 
         public World(int width, int height)
         {
@@ -25,7 +25,7 @@ namespace lifeEngine
             items = new Layer<Tile>(width, height);
             temps = new Layer<float>(width, height);
 
-            heatTransferRate = 1;
+            heatConductivity = 0.25f;
         }
         public World(Layer<Tile> mapLayer)
         {
@@ -33,7 +33,7 @@ namespace lifeEngine
             items = new Layer<Tile>(mapLayer.size.x, mapLayer.size.y);
             temps = new Layer<float>(mapLayer.size.x, mapLayer.size.y);
 
-            heatTransferRate = 1;
+            heatConductivity = 0.25f;
         }
         const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
@@ -54,8 +54,8 @@ namespace lifeEngine
         }
         public void Tick(float time, float deltaTime)
         {
-            SpreadHeat(deltaTime);
-            ApplyOutdoorHeat(deltaTime);
+            SpreadTemperature(deltaTime);
+            ApplyAmbientTemperature(deltaTime);
 
             //KAI: apples and oranges with the two Tick calls w.r.t. _lastTick
             foreach (var actor in _actors)
@@ -63,7 +63,7 @@ namespace lifeEngine
                 actor.FixedUpdate(time, deltaTime);
             }
         }
-        void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by, float maxHeatExchange)
+        void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by, float deltaTime)
         {
             float Ta = layerTemps.Get(ax, ay);
             float Tb = layerTemps.Get(bx, by);
@@ -83,10 +83,10 @@ namespace lifeEngine
 
                 // Exchange the heat over time
                 float Hdelta = (Tequilibrium - Ta) * a.Mass;
-                float HdeltaClamped = Util.Clamp(Hdelta, -maxHeatExchange, maxHeatExchange);
+                float HdeltaMitigatedOverTime = Math.Min(Hdelta, Hdelta * deltaTime * heatConductivity);
 
-                layerTemps.Set(ax, ay, Ta + (HdeltaClamped / a.Mass));
-                layerTemps.Set(bx, by, Tb - (HdeltaClamped / b.Mass));
+                layerTemps.Set(ax, ay, Ta + (HdeltaMitigatedOverTime / a.Mass));
+                layerTemps.Set(bx, by, Tb - (HdeltaMitigatedOverTime / b.Mass));
 
                 //if (ax == 3 && ay == 1)
                 //Console.WriteLine(string.Format("({0},{1}) <=> ({2},{3}), Ta {4:0.00} Tb {5:0.00}, Teq {6:0.00}, Ta' {7:0.00}, Tb' {8:0.00}",
@@ -102,11 +102,11 @@ namespace lifeEngine
                 //    ));
             }
         }
-        void SpreadHeat(float deltaTime)
+        void SpreadTemperature(float deltaTime)
         {
             // loop all tiles, radiating warmer temps into colder ones.  Do this in two passes for each of the horizontal
             // and vertical directions to make the spread more uniform.
-            float maxHeatExchange = deltaTime * heatTransferRate;
+            float maxHeatExchange = deltaTime * heatConductivity;
 
             for (var x = 1; x < temps.size.x; x += 2)
             {
@@ -125,12 +125,9 @@ namespace lifeEngine
                 }
             }
         }
-        void ApplyOutdoorHeat(float deltaTime)
+        void ApplyAmbientTemperature(float deltaTime)
         {
             // trend outdoor tiles to the ambient weather-influenced temperature
-            const float airMass = 1; // KAI:
-            const float fudgeTheRate = 0.2f;  // Not sure why, the heat is flowing too fast
-            float maxTempExchange = deltaTime * heatTransferRate * airMass * fudgeTheRate;
             temps.ForEach((x, y, tile) =>
             {
                 if (rooms.Get(x, y).IsOutside)
@@ -138,7 +135,7 @@ namespace lifeEngine
                     var temp = temps.Get(x, y);
                     if (temp != outdoorTemperature)
                     {
-                        temps.Set(x, y, Util.Lerp(temp, outdoorTemperature, maxTempExchange));
+                        temps.Set(x, y, Util.Lerp(temp, outdoorTemperature, heatConductivity * deltaTime));
                     }
                 }
             });
@@ -224,7 +221,7 @@ namespace lifeEngine
         public bool IsRoom { get { return type > 'a' && type < 'z';  } }
         public bool IsPassable { get { return type == '.' || IsOutside; } }
 
-        public float Mass { get { return IsWall ? 100 : 1; } } // brick = 100 units, air = 1
+        public float Mass { get { return IsWall ? 50 : 1; } }
         public override string ToString()
         {
             return type.ToString();
