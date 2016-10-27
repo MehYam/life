@@ -101,20 +101,20 @@ namespace lifeEngine
         }
         public static readonly Point<int> zero = new Point<int>(0, 0);
 
-        public static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char fillColor)
+        public static int LayerFloodFill(Layer<int> layer, Point<int> start, int fillColor)
         {
-            return LayerFloodFill(layer, start, layer.Get(start).type, fillColor);
+            return LayerFloodFill(layer, start, layer.Get(start), fillColor);
         }
-        public static int LayerFloodFill(Layer<Tile> layer, Point<int> start, char targetColor, char fillColor)
+        public static int LayerFloodFill(Layer<int> layer, Point<int> start, int targetColor, int fillColor)
         {
             return LayerFloodFill(
                 layer,
                 start,
-                point => layer.Get(point).type == targetColor, // fillCondition
-                point => layer.Set(point, new Tile(fillColor)) // fillAction
+                point => layer.Get(point) == targetColor, // fillCondition
+                point => layer.Set(point, fillColor) // fillAction
                 );
         }
-        public static int LayerFloodFill(Layer<Tile> layer, Point<int> point, Func<Point<int>, bool> fillCondition, Action<Point<int>> fillAction)
+        public static int LayerFloodFill(Layer<int> layer, Point<int> point, Func<Point<int>, bool> fillCondition, Action<Point<int>> fillAction)
         {
             // adapted from https://simpledevcode.wordpress.com/2015/12/29/flood-fill-algorithm-using-c-net/
             if (!fillCondition(point))

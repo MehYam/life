@@ -5,11 +5,27 @@ using System.Text;
 
 namespace lifeEngine
 {
+    public class Tile
+    {
+        public static char[] types = { 'O', 'o', '.', ' ', '#' };
+
+        public readonly char type;
+        public Tile(char type)
+        {
+            this.type = type;
+        }
+        public bool IsEmpty {  get { return type == ' ' || type == '.' ;  } }
+        public float Mass { get { return type == '#' ? 50 : 1; } }  // temporary, until we figure this out
+        public override string ToString()
+        {
+            return type.ToString();
+        }
+    }
     public sealed class World
     {
-        public Layer<Tile> map { get; set; }  //KAI: abstract these, appropriately.
-        public Layer<Tile> items { get; set; }
-        public Layer<Tile> rooms { get; private set; }
+        public Layer<Tile> ground { get; set; }
+        public Layer<Tile> walls { get; set; }  //KAI: abstract these, appropriately.
+        public Layer<int> rooms { get; private set; }  // index into the room #.  0 == not a room
         public Layer<float> temps { get; set; }
         public float outdoorTemperature { get; set; }
 
@@ -21,17 +37,17 @@ namespace lifeEngine
 
         public World(int width, int height)
         {
-            map = new Layer<Tile>(width, height);
-            items = new Layer<Tile>(width, height);
-            temps = new Layer<float>(width, height);
-
-            heatConductivity = 0.25f;
+            Init(new Layer<Tile>(width, height), width, height);
         }
         public World(Layer<Tile> mapLayer)
         {
-            map = mapLayer;
-            items = new Layer<Tile>(mapLayer.size.x, mapLayer.size.y);
-            temps = new Layer<float>(mapLayer.size.x, mapLayer.size.y);
+            Init(mapLayer, mapLayer.size.x, mapLayer.size.y);
+        }
+        void Init(Layer<Tile> walls, int width, int height)
+        {
+            this.walls = walls;
+            temps = new Layer<float>(width, height);
+            rooms = new Layer<int>(width, height);
 
             heatConductivity = 0.25f;
         }
@@ -112,16 +128,16 @@ namespace lifeEngine
             {
                 for (var y = 0; y < temps.size.y; ++y)
                 {
-                    ExchangeHeat(map, temps, x, y, x - 1, y, maxHeatExchange);
-                    if (x < map.size.x - 1) ExchangeHeat(map, temps, x, y, x + 1, y, maxHeatExchange);
+                    ExchangeHeat(walls, temps, x, y, x - 1, y, maxHeatExchange);
+                    if (x < walls.size.x - 1) ExchangeHeat(walls, temps, x, y, x + 1, y, maxHeatExchange);
                 }
             }
             for (var y = 1; y < temps.size.y; y += 2)
             {
                 for (var x = 0; x < temps.size.x; ++x)
                 {
-                    ExchangeHeat(map, temps, x, y, x, y - 1, maxHeatExchange);
-                    if (y < map.size.y - 1) ExchangeHeat(map, temps, x, y, x, y + 1, maxHeatExchange);
+                    ExchangeHeat(walls, temps, x, y, x, y - 1, maxHeatExchange);
+                    if (y < walls.size.y - 1) ExchangeHeat(walls, temps, x, y, x, y + 1, maxHeatExchange);
                 }
             }
         }
@@ -130,7 +146,7 @@ namespace lifeEngine
             // trend outdoor tiles to the ambient weather-influenced temperature
             temps.ForEach((x, y, tile) =>
             {
-                if (rooms.Get(x, y).IsOutside)
+                if (IsOutside(x, y))
                 {
                     var temp = temps.Get(x, y);
                     if (temp != outdoorTemperature)
@@ -160,27 +176,32 @@ namespace lifeEngine
             }
             return null;
         }
-        //KAI: very leaky abstractions here, need to think about the integrity of the World object
-        static Layer<Tile> DetectRooms(Layer<Tile> layer)
+        static Layer<int> DetectRooms(Layer<Tile> walls)
         {
-            // flood fill each unique contiguous empty region with something unique.  We'll make a copy first so as to
-            // not disturb the original map
-            var layerCopy = new Layer<Tile>(layer);
+            // use flood fill to find all the contiguous regions that aren't walls.
 
-            char region = 'a';
-            layerCopy.ForEach((x, y, tile) =>
+            // start by generating a stencil of the walls.
+            var rooms = Operations.CreateLayerMask(walls);
+
+            int roomIndex = 1;
+            rooms.ForEach((x, y, tile) =>
             {
-                int tilesFilled = Util.LayerFloodFill(layerCopy, new Point<int>(x, y), ' ', region);
+                int tilesFilled = Util.LayerFloodFill(rooms, new Point<int>(x, y), 0, roomIndex);
                 if (tilesFilled > 0)
                 {
-                    ++region;
+                    ++roomIndex;
                 }
             });
-            return layerCopy;
+            return rooms;
         }
         public void RecalculateRooms()
         {
-            rooms = DetectRooms(map);
+            rooms = DetectRooms(walls);
+        }
+        public bool IsOutside(int x, int y)
+        {
+            var roomId = rooms.Get(x, y);
+            return (roomId == 0 || roomId == 1) && walls.Get(x, y).IsEmpty;
         }
         bool running;
         /// <summary>
@@ -204,27 +225,6 @@ namespace lifeEngine
         public void StopSimulation()
         {
             running = false;
-        }
-    }
-    public class Tile
-    {
-        public static char[] types = { 'O', 'o', '.', ' ', '#' };
-
-        public readonly char type;
-        public Tile(char type)
-        {
-            this.type = type;
-        }
-        //KAI: hacks for now, until things get formalized a bit more
-        public bool IsWall { get { return type == '#'; } }
-        public bool IsOutside {  get { return type == 'a' || type == ' '; } }
-        public bool IsRoom { get { return type > 'a' && type < 'z';  } }
-        public bool IsPassable { get { return type == '.' || IsOutside; } }
-
-        public float Mass { get { return IsWall ? 50 : 1; } }
-        public override string ToString()
-        {
-            return type.ToString();
         }
     }
 }

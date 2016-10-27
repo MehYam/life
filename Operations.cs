@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +28,22 @@ namespace lifeEngine
                 return retval;
             }
             return null;
+        }
+        /// <summary>
+        /// Creates a stencil of the provided layer
+        /// </summary>
+        /// <param name="layer"></param>
+        /// <param name="emptyTile">the int to represent an empty tile</param>
+        /// <param name="nonEmptyTile">the int to represent a non-empty tile</param>
+        /// <returns></returns>
+        public static Layer<int> CreateLayerMask(Layer<Tile> layer, int emptyTile = 0, int nonEmptyTile = -1)
+        {
+            var mask = new Layer<int>(layer.size.x, layer.size.y);
+            mask.ForEach((x, y, tile) =>
+            {
+                mask.Set(x, y, layer.Get(x, y).IsEmpty ? emptyTile : nonEmptyTile);
+            });
+            return mask;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿//#define DEBUG_MOVE
+//#define DEBUG_MOVE
 
 using System;
 using System.Collections.Generic;
@@ -11,19 +11,23 @@ namespace lifeEngine.behavior
     {
         readonly Actor mover;
         readonly List<Point<int>> path;
-        public MoveTo(Layer<Tile> map, Actor mover, Point<int> target)
+        public MoveTo(World world, Actor mover, Point<int> target)
         {
             this.mover = mover;
 
             // determine the path, set the actor along it
             var search = new MapAStar<Tile>();
 
-            search.PathFind(map, t => { return t.IsPassable; }, mover.pos.ToInt(), target);
+            search.PathFind(world.walls, t => { return t.IsEmpty; }, mover.pos.ToInt(), target);
 
             // There's no deque in C#.  To avoid shifting the array each time we remove an item, just reverse the list and work backward.
             //KAI: just turn this into LinkedList...
             search.result.Reverse();
             path = search.result;
+
+#if DEBUG_MOVE
+            Console.WriteLine("MoveTo evaluated path with {0} tiles", path.Count);
+#endif
         }
         public void FixedUpdate(float time, float deltaTime)
         {
@@ -57,7 +61,7 @@ namespace lifeEngine.behavior
                     travelSoFar += travelNow;
 
 #if DEBUG_MOVE
-                    Console.WriteLine(string.Format("Actor move from {0} to {1}", debug, mover.pos));
+                    Console.WriteLine(string.Format("Actor move from {0} to {1}, {2} tiles remaining", debug, mover.pos, path.Count));
 #endif
                 }
             }

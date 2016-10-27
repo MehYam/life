@@ -199,14 +199,14 @@ namespace lifeTest
         {
             var world = new World(100, 20);
             var noise = new Perlin();
-            world.map.Fill((int x, int y, Tile oldTile) =>
+            world.walls.Fill((int x, int y, Tile oldTile) =>
             {
                 double perlin = noise.perlin(x + 0.5, y + 0.5, 0);
 
                 char tile = Tile.types[(int)(perlin * Tile.types.Length)];
                 return new Tile(tile);
             });
-            Console.WriteLine(world.map);
+            Console.WriteLine(world.walls);
 
             var actorA = new Actor();
             var actorB = new Actor();
@@ -215,20 +215,19 @@ namespace lifeTest
             world.AddActor(actorA);
             world.AddActor(actorB);
 
-            actorA.AddPriority(new lifeEngine.behavior.MoveTo(world.map, actorA, actorB.pos.ToInt()));
+            actorA.AddPriority(new lifeEngine.behavior.MoveTo(world, actorA, actorB.pos.ToInt()));
             world.RunSimulation(10);
         }
         static void FloodFillTest()
         {
             var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var mask = Operations.CreateLayerMask(layer, 0, 1);
 
-            //LayerFloodFill(layer, new Point<int>(0, 0), '-');
-            //LayerFloodFill(layer, new Point<int>(4, 1), '-');
-            Util.LayerFloodFill(layer, new Point<int>(5, 8), '-');
-            //LayerFloodFill(layer, new Point<int>(34, 8), '-');
-            //LayerFloodFill(layer, new Point<int>(layer.width-2, layer.height-1), '-');
+            //Util.LayerFloodFill(mask, new Point<int>(5, 8), 8);
+            Util.LayerFloodFill(mask, new Point<int>(0, 0), 4);
 
             Console.WriteLine(layer);
+            Console.WriteLine(mask);
         }
         static void RoomDetectionTest()
         {
@@ -261,7 +260,7 @@ namespace lifeTest
             const float INDOOR = 25;
 
             world.outdoorTemperature = AMBIENT;
-            world.temps.Fill((x, y, tile) => world.rooms.Get(x, y).IsOutside ? world.outdoorTemperature : INDOOR);
+            world.temps.Fill((x, y, tile) => world.IsOutside(x, y) ? world.outdoorTemperature : INDOOR);
 
             // add a heater
             var heatSource = new Actor('t');
