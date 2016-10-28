@@ -80,7 +80,27 @@ namespace lifeEngine
                 actor.FixedUpdate(time, deltaTime);
             }
         }
-        void ExchangeHeat(Layer<Tile> walls, Layer<float> temps, int ax, int ay, int bx, int by, float deltaTime)
+        void ExchangeHeat_simple(Layer<Tile> walls, Layer<float> temps, int ax, int ay, int bx, int by, float deltaTime)
+        {
+            float Ta = temps.Get(ax, ay);
+            float Tb = temps.Get(bx, by);
+
+            if (!Util.NearlyEqual(Ta, Tb))
+            {
+                var a = walls.Get(ax, ay);
+                var b = walls.Get(bx, by);
+
+                var avg = (Ta + Tb) / 2;
+                if (IsRoom(ax, ay) && IsRoom(bx, by))
+                {
+                    // promote indoor heat transfer
+                    avg = (Math.Max(Ta, Tb) + avg) / 2;
+                }
+                temps.Set(ax, ay, avg);
+                temps.Set(bx, by, avg);
+            }
+        }
+        void ExchangeHeat_realistic(Layer<Tile> walls, Layer<float> temps, int ax, int ay, int bx, int by, float deltaTime)
         {
             float Ta = temps.Get(ax, ay);
             float Tb = temps.Get(bx, by);
@@ -134,10 +154,10 @@ namespace lifeEngine
                     for (var y = 0; y < rise; ++y)
                     {
                         // horizontal spread
-                        ExchangeHeat(walls, temps, x, y, x + 1, y, maxHeatExchange);
+                        ExchangeHeat_simple(walls, temps, x, y, x + 1, y, maxHeatExchange);
 
                         // vertical spread
-                        ExchangeHeat(walls, temps, x, y, x, y + 1, maxHeatExchange);
+                        ExchangeHeat_simple(walls, temps, x, y, x, y + 1, maxHeatExchange);
                     }
                 }
             }
@@ -148,10 +168,10 @@ namespace lifeEngine
                     for (var y = temps.size.y - 1; y > 0; --y)
                     {
                         // horizontal spread
-                        ExchangeHeat(walls, temps, x, y, x - 1, y, maxHeatExchange);
+                        ExchangeHeat_simple(walls, temps, x, y, x - 1, y, maxHeatExchange);
 
                         // vertical spread
-                        ExchangeHeat(walls, temps, x, y, x, y - 1, maxHeatExchange);
+                        ExchangeHeat_simple(walls, temps, x, y, x, y - 1, maxHeatExchange);
                     }
                 }
             }
