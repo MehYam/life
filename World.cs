@@ -50,7 +50,7 @@ namespace lifeEngine
             temps = new Layer<float>(width, height);
             rooms = new Layer<int>(width, height);
 
-            heatConductivity = 0.25f;
+            heatConductivity = 0.75f;
         }
         const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
@@ -96,8 +96,12 @@ namespace lifeEngine
                     // promote indoor heat transfer
                     avg = (Math.Max(Ta, Tb) + avg) / 2;
                 }
-                temps.Set(ax, ay, avg);
-                temps.Set(bx, by, avg);
+
+                Ta += (avg - Ta) * deltaTime * heatConductivity;
+                Tb += (avg - Tb) * deltaTime * heatConductivity;
+
+                temps.Set(ax, ay, Ta);
+                temps.Set(bx, by, Tb);
             }
         }
         void ExchangeHeat_realistic(Layer<Tile> walls, Layer<float> temps, int ax, int ay, int bx, int by, float deltaTime)
