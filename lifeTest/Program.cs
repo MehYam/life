@@ -22,7 +22,7 @@ namespace lifeTest
             //PathfindTravelTest();
             //FloodFillTest();
             //RoomDetectionTest();
-            //ThermodynamicsTest();
+            ThermodynamicsTest();
         }
         static void ArrayTest()
         {
@@ -220,7 +220,7 @@ namespace lifeTest
         }
         static void FloodFillTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\lifeEngine\\simplerooms1.txt");
             var mask = Operations.CreateLayerMask(layer, 0, 1);
 
             //Util.LayerFloodFill(mask, new Point<int>(5, 8), 8);
@@ -231,7 +231,7 @@ namespace lifeTest
         }
         static void RoomDetectionTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms1.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\lifeEngine\\simplerooms1.txt");
             var world = new World(layer);
             world.RecalculateRooms();
 
@@ -249,7 +249,7 @@ namespace lifeTest
         }
         static void ThermodynamicsTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms0_1.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\lifeEngine\\simplerooms0_1.txt");
             Console.WriteLine(layer);
 
             var world = new World(layer);
