@@ -46,6 +46,7 @@ namespace lifeEngine
         void Init(Layer<Tile> walls, int width, int height)
         {
             this.walls = walls;
+            ground = new Layer<Tile>(walls);
             temps = new Layer<float>(width, height);
             rooms = new Layer<int>(width, height);
 
@@ -79,15 +80,15 @@ namespace lifeEngine
                 actor.FixedUpdate(time, deltaTime);
             }
         }
-        void ExchangeHeat(Layer<Tile> layer, Layer<float> layerTemps, int ax, int ay, int bx, int by, float deltaTime)
+        void ExchangeHeat(Layer<Tile> walls, Layer<float> temps, int ax, int ay, int bx, int by, float deltaTime)
         {
-            float Ta = layerTemps.Get(ax, ay);
-            float Tb = layerTemps.Get(bx, by);
+            float Ta = temps.Get(ax, ay);
+            float Tb = temps.Get(bx, by);
 
             if (!Util.NearlyEqual(Ta, Tb))
             {
-                var a = layer.Get(ax, ay);
-                var b = layer.Get(bx, by);
+                var a = walls.Get(ax, ay);
+                var b = walls.Get(bx, by);
 
                 // Heat = Mass x Temp in our simplified thermodynamics model
                 float Ha = a.Mass * Ta;
@@ -101,8 +102,8 @@ namespace lifeEngine
                 float Hdelta = (Tequilibrium - Ta) * a.Mass;
                 float HdeltaMitigatedOverTime = Math.Min(Hdelta, Hdelta * deltaTime * heatConductivity);
 
-                layerTemps.Set(ax, ay, Ta + (HdeltaMitigatedOverTime / a.Mass));
-                layerTemps.Set(bx, by, Tb - (HdeltaMitigatedOverTime / b.Mass));
+                temps.Set(ax, ay, Ta + (HdeltaMitigatedOverTime / a.Mass));
+                temps.Set(bx, by, Tb - (HdeltaMitigatedOverTime / b.Mass));
 
                 //if (ax == 3 && ay == 1)
                 //Console.WriteLine(string.Format("({0},{1}) <=> ({2},{3}), Ta {4:0.00} Tb {5:0.00}, Teq {6:0.00}, Ta' {7:0.00}, Tb' {8:0.00}",
@@ -118,28 +119,43 @@ namespace lifeEngine
                 //    ));
             }
         }
+        bool _spreadSouthEast = true;
         void SpreadTemperature(float deltaTime)
         {
-            // loop all tiles, radiating warmer temps into colder ones.  Do this in two passes for each of the horizontal
-            // and vertical directions to make the spread more uniform.
+            // loop all tiles, spreading heat across tiles
             float maxHeatExchange = deltaTime * heatConductivity;
 
-            for (var x = 1; x < temps.size.x; x += 2)
+            if (_spreadSouthEast)
             {
-                for (var y = 0; y < temps.size.y; ++y)
+                var run = temps.size.x - 1;
+                var rise = temps.size.y - 1;
+                for (var x = 0; x < run; ++x)
                 {
-                    ExchangeHeat(walls, temps, x, y, x - 1, y, maxHeatExchange);
-                    if (x < walls.size.x - 1) ExchangeHeat(walls, temps, x, y, x + 1, y, maxHeatExchange);
+                    for (var y = 0; y < rise; ++y)
+                    {
+                        // horizontal spread
+                        ExchangeHeat(walls, temps, x, y, x + 1, y, maxHeatExchange);
+
+                        // vertical spread
+                        ExchangeHeat(walls, temps, x, y, x, y + 1, maxHeatExchange);
+                    }
                 }
             }
-            for (var y = 1; y < temps.size.y; y += 2)
+            else
             {
-                for (var x = 0; x < temps.size.x; ++x)
+                for (var x = temps.size.x - 1; x > 0; --x)
                 {
-                    ExchangeHeat(walls, temps, x, y, x, y - 1, maxHeatExchange);
-                    if (y < walls.size.y - 1) ExchangeHeat(walls, temps, x, y, x, y + 1, maxHeatExchange);
+                    for (var y = temps.size.y - 1; y > 0; --y)
+                    {
+                        // horizontal spread
+                        ExchangeHeat(walls, temps, x, y, x - 1, y, maxHeatExchange);
+
+                        // vertical spread
+                        ExchangeHeat(walls, temps, x, y, x, y - 1, maxHeatExchange);
+                    }
                 }
             }
+            _spreadSouthEast = !_spreadSouthEast;
         }
         void ApplyAmbientTemperature(float deltaTime)
         {
@@ -201,7 +217,12 @@ namespace lifeEngine
         public bool IsOutside(int x, int y)
         {
             var roomId = rooms.Get(x, y);
-            return (roomId == 0 || roomId == 1) && walls.Get(x, y).IsEmpty;
+            return (roomId == 0 || roomId == 1) && walls.Get(x, y).IsEmpty;  //KAI: the IsEmpty is probably superfluous, roomId should be -1 there
+        }
+        public bool IsRoom(int x, int y)
+        {
+            var roomId = rooms.Get(x, y);
+            return roomId > 1;
         }
         bool running;
         /// <summary>

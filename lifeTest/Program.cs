@@ -249,7 +249,7 @@ namespace lifeTest
         }
         static void ThermodynamicsTest()
         {
-            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms0.txt");
+            var layer = Operations.LoadLayerFile("c:\\source\\cs\\life\\simplerooms0_1.txt");
             Console.WriteLine(layer);
 
             var world = new World(layer);
@@ -264,7 +264,7 @@ namespace lifeTest
 
             // add a heater
             var heatSource = new Actor('t');
-            heatSource.pos = new Point<float>(7, 1);
+            heatSource.pos = new Point<float>(10, 10);
             heatSource.AddPriority(new lifeEngine.behavior.TemperatureSource(world, heatSource.pos.ToInt(), 40));
             world.AddActor(heatSource);
 
@@ -273,6 +273,7 @@ namespace lifeTest
             while (true)
             {
                 Console.ReadKey();
+                Console.Clear();
 
                 world.Tick(0, 1);  // tick the world, one second at a time
                 Console.WriteLine(RenderHeat(world.temps));
