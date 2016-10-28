@@ -22,7 +22,7 @@ namespace lifeTest
             //PathfindTravelTest();
             //FloodFillTest();
             //RoomDetectionTest();
-            ThermodynamicsTest();
+            //ThermodynamicsTest();
         }
         static void ArrayTest()
         {
