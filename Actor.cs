@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +7,11 @@ using lifeEngine.behavior;
 
 namespace lifeEngine
 {
+    public class ActorAttributes
+    {
+        public float health;
+
+    }
     public class Actor : ITickHandler
     {
         public readonly char type;

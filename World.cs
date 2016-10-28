@@ -27,7 +27,9 @@ namespace lifeEngine
         public Layer<Tile> walls { get; set; }  //KAI: abstract these, appropriately.
         public Layer<int> rooms { get; private set; }  // index into the room #.  0 == not a room
         public Layer<float> temps { get; set; }
+
         public float outdoorTemperature { get; set; }
+        public bool thermodynamicsEnabled { get; set; }
 
         /// <summary>
         /// How quickly heat spreads.  It's defined as the percentage of heat difference transferred per sec, range (0-1).
@@ -51,6 +53,7 @@ namespace lifeEngine
             rooms = new Layer<int>(width, height);
 
             heatConductivity = 0.75f;
+            thermodynamicsEnabled = true;
         }
         const long DATETIME_TICKS_PER_SEC = 10 * 1000 * 1000;
         long _lastTick;
@@ -71,8 +74,11 @@ namespace lifeEngine
         }
         public void Tick(float time, float deltaTime)
         {
-            SpreadTemperature(deltaTime);
-            ApplyAmbientTemperature(deltaTime);
+            if (thermodynamicsEnabled)
+            {
+                SpreadTemperature(deltaTime);
+                ApplyAmbientTemperature(deltaTime);
+            }
 
             //KAI: apples and oranges with the two Tick calls w.r.t. _lastTick
             foreach (var actor in _actors)
